@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学力調査ダッシュボード（プロトタイプ）</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .file-upload { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .summary-cards { display: flex; gap: 20px; margin-bottom: 20px; }
+        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; text-align: center; }
+        .card h3 { margin: 0 0 10px 0; color: #666; font-size: 16px; }
+        .card .number { font-size: 32px; font-weight: bold; color: #2c3e50; }
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .chart-container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        /* 3つ目のグラフは横幅いっぱいに広げる */
+        .full-width { grid-column: span 2; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>学力調査ダッシュボード</h2>
+        <div class="file-upload">
+            <label for="csvFileInput">CSVデータ読み込み：</label>
+            <input type="file" id="csvFileInput" accept=".csv">
+        </div>
+    </div>
+
+    <!-- サマリー領域 -->
+    <div class="summary-cards">
+        <div class="card">
+            <h3>総参加人数</h3>
+            <div class="number" id="participantCount">- 人</div>
+        </div>
+        <div class="card">
+            <h3>全体平均点</h3>
+            <div class="number" id="averageScore">- 点</div>
+        </div>
+    </div>
+
+    <!-- グラフ領域 -->
+    <div class="dashboard">
+        <div class="chart-container">
+            <canvas id="questionRateChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="scoreDistChart"></canvas>
+        </div>
+        <div class="chart-container full-width">
+            <canvas id="groupAvgChart"></canvas>
+        </div>
+    </div>
+
+    <!-- グラフ描画用（Chart.js）とCSV読み込み用（Papa Parse）のライブラリ（後でローカル化します） -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <script>
+        // グラフのインスタンスを保持する変数（再描画時に古いグラフを消すため）
+        let charts = {};
+
+        // 1. ファイルが選択された時の処理
+        document.getElementById('csvFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Papa ParseでCSVを読み込む
+            Papa.parse(file, {
+                header: true, // 1行目をキー名として扱う
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const data = results.data;
+                    processData(data); // データの集計・描画処理へ
+                }
+            });
+        });
+
+        // 2. データの集計とグラフ描画を行う関数（将来の絞り込み機能のベースになります）
+        function processData(data) {
+            let totalScore = 0;
+            let participantCount = data.length;
+            
+            let questionCorrectCounts = Array(10).fill(0); // Q1〜Q10の正解者数
+            let groupStats = {}; // グループごとの集計
+            let scoreDistribution = { '0-2点':0, '3-4点':0, '5-6点':0, '7-8点':0, '9-10点':0 }; // 得点分布
+
+            // 各回答者（1行）ごとのループ処理
+            data.forEach(row => {
+                let score = 0;
+                
+                // Q1〜Q10の正誤を判定して得点を計算
+                for (let i = 1; i <= 10; i++) {
+                    let isCorrect = parseInt(row[`Q${i}_正誤`], 10);
+                    if (isCorrect === 1) {
+                        score += 1;
+                        questionCorrectCounts[i-1] += 1;
+                    }
+                }
+                totalScore += score;
+
+                // 所属グループ別の集計
+                let group = row['所属グループ'];
+                if (!groupStats[group]) {
+                    groupStats[group] = { totalScore: 0, count: 0 };
+                }
+                groupStats[group].totalScore += score;
+                groupStats[group].count += 1;
+
+                // 得点分布の集計
+                if (score <= 2) scoreDistribution['0-2点']++;
+                else if (score <= 4) scoreDistribution['3-4点']++;
+                else if (score <= 6) scoreDistribution['5-6点']++;
+                else if (score <= 8) scoreDistribution['7-8点']++;
+                else scoreDistribution['9-10点']++;
+            });
+
+            // 3. サマリーの表示更新
+            let averageScore = (totalScore / participantCount).toFixed(1);
+            document.getElementById('participantCount').textContent = participantCount + ' 人';
+            document.getElementById('averageScore').textContent = averageScore + ' 点';
+
+            // 4. グラフ用のデータ整形と描画
+            
+            // ①問題ごとの正答率
+            let questionLabels = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10'];
+            let questionRates = questionCorrectCounts.map(count => (count / participantCount * 100).toFixed(1));
+            drawChart('questionRateChart', 'bar', questionLabels, questionRates, '正答率 (%)', ['#3498db']);
+
+            // ②得点分布
+            drawChart('scoreDistChart', 'bar', Object.keys(scoreDistribution), Object.values(scoreDistribution), '人数 (人)', ['#2ecc71']);
+
+            // ③グループ別平均点
+            let groupLabels = Object.keys(groupStats);
+            let groupAverages = groupLabels.map(g => (groupStats[g].totalScore / groupStats[g].count).toFixed(1));
+            drawChart('groupAvgChart', 'bar', groupLabels, groupAverages, '平均点 (点)', ['#9b59b6']);
+        }
+
+        // 共通のグラフ描画関数
+        function drawChart(canvasId, type, labels, dataPoints, labelName, colors) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            // すでにグラフがあれば破棄する（データを切り替えた時のため）
+            if (charts[canvasId]) {
+                charts[canvasId].destroy();
+            }
+
+            charts[canvasId] = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: labelName,
+                        data: dataPoints,
+                        backgroundColor: colors[0],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: { display: true, text: document.getElementById(canvasId).parentElement.querySelector('canvas').id === 'questionRateChart' ? '問題別 正答率' : canvasId === 'scoreDistChart' ? '得点分布' : 'グループ別 平均点' }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
