@@ -3,197 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>岩手県学習定着度状況調査　ダッシュボード</title>
+    <title>学力調査ダッシュボード</title>
     <style>
-        /* ★画面全体の高さ（100%）に固定し、外側の余計なスクロールをカット★ */
+        /* ========================================================= */
+        /* ★完全復活★ 画面表示用の基本スタイル (100dvh 可変追従モデル) */
+        /* ========================================================= */
         html, body {
             height: 100dvh;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* 画面自体のスクロールバーを消す */
+            overflow: hidden;
             box-sizing: border-box;
         }
         body {
             font-family: sans-serif;
             background-color: #f4f7f6;
-            padding: 15px; /* 余白を少し引き締めて画面を広く */
+            padding: 15px;
             display: flex;
-            flex-direction: column; /* 縦並びのFlexboxレイアウト */
+            flex-direction: column;
         }
         
-        /* 固定の高さを持つ要素 */
         .header { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             margin-bottom: 15px; 
-            flex-shrink: 0; /* 画面が狭くなっても潰れないように固定 */
+            flex-shrink: 0;
+        }
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .file-inputs-group {
+            display: flex;
+            gap: 15px;
         }
         .file-upload { background: #fff; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         
+        .print-button {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background-color 0.2s;
+        }
+        .print-button:hover { background-color: #1a252f; }
+
         .tabs { margin-bottom: 15px; border-bottom: 2px solid #ddd; flex-shrink: 0; }
         .tab-button { background: none; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; color: #666; }
         .tab-button.active { border-bottom: 3px solid #3498db; color: #3498db; font-weight: bold; }
 
-        /* タブ切り替え画面をFlexboxにして、残りの高さを目いっぱい使う */
         .view-section { 
             display: none; 
             flex-direction: column;
             flex: 1; 
-            min-height: 0; /* Flexbox内で潰れを許容し、自動フィットさせるための極めて重要な指示 */
+            min-height: 0;
         }
         .view-section.active { display: flex; }
 
-        /* サマリーカード */
         .summary-cards { display: flex; gap: 15px; margin-bottom: 15px; flex-shrink: 0; }
         .card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; text-align: center; }
         .card h3 { margin: 0 0 5px 0; color: #666; font-size: 14px; }
         .card .number { font-size: 28px; font-weight: bold; color: #2c3e50; }
         
-        /* ★全体レポート専用：高さを100%使い切る左右均等幅★ */
-        .overall-dashboard {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            flex: 1; /* 残りの高さをすべて使い切る */
-            min-height: 0;
-        }
-        .overall-left {
-            height: 100%;
-        }
-        .overall-right {
+        .scrollable-view {
+            flex: 1;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            height: 100%;
-        }
-        
-        /* 全体：左側の大きなコンテナ */
-        .chart-container-large {
-            background: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            height: 100%; /* 親の高さに完全追従 */
-            box-sizing: border-box;
-            position: relative;
-        }
-
-        /* 全体：右側の小さなコンテナ */
-        .chart-container-small {
-            background: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            flex: 1; /* 残りの高さを2等分する */
-            min-height: 0;
-            box-sizing: border-box;
-            position: relative;
-        }
-
-        /* 共通の２列レイアウト（クラス・個人で使用） */
-        .dashboard { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px; 
-            align-items: stretch;
-            flex: 1; /* 残りの高さをすべて使い切る */
             min-height: 0;
         }
 
-        /* 共通：グラフ・テーブルコンテナ */
-        .chart-container { 
-            background: #fff; 
-            padding: 15px; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            height: 100%; /* 親の高さに完全追従 */
-            box-sizing: border-box;
-            position: relative;
-            overflow-y: auto; /* テーブルがはみ出た場合はこの中で綺麗にスクロール */
-        }
-        .full-width { grid-column: span 2; }
+        /* パソコン画面用の美しい2列左右均等レイアウト（左：大、右：小縦並び2段） */
+        .overall-dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; height: 580px; flex-shrink: 0; }
+        .overall-left { height: 100%; }
+        .overall-right { display: flex; flex-direction: column; gap: 15px; height: 100%; }
         
-        .control-panel { background: #fff; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; }
+        .chart-container-large { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); height: 100%; box-sizing: border-box; position: relative; }
+        .chart-container-small { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-height: 0; box-sizing: border-box; position: relative; }
+        .overall-bottom { height: 380px; flex-shrink: 0; }
+
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: stretch; flex: 1; min-height: 0; }
+        
+        .dashboard-personal-top {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 15px;
+            height: 350px;
+            flex-shrink: 0;
+        }
+
+        .chart-container { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); height: 100%; box-sizing: border-box; position: relative; overflow-y: auto; }
+        
+        .control-panel { background: #fff; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; }
         select { padding: 6px; font-size: 15px; border-radius: 4px; }
 
-        /* 個人比較テーブル用のスタイル */
-        .personal-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        .personal-table th, .personal-table td {
-            padding: 10px 12px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-            font-size: 14px;
-        }
-        .personal-table th {
-            background-color: #f8f9fa;
-            color: #555;
-            font-weight: bold;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        .personal-table tr:hover {
-            background-color: #fcfcfc;
-        }
-        .badge-correct {
-            color: #2ecc71;
-            font-weight: bold;
-            font-size: 16px;
-        }
-        .badge-incorrect {
-            color: #e74c3c;
-            font-weight: bold;
-            font-size: 16px;
-        }
-        
-        .correct-ans-cell {
-            font-weight: bold;
-            color: #e67e22;
-        }
-
+        /* テーブル用スタイル */
+        .personal-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .personal-table th, .personal-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e0e0e0; font-size: 14px; }
+        .personal-table th { background-color: #f8f9fa; color: #555; font-weight: bold; position: sticky; top: 0; z-index: 10; }
+        .personal-table tr:hover { background-color: #fcfcfc; }
+        .badge-correct { color: #2ecc71; font-weight: bold; font-size: 16px; }
+        .badge-incorrect { color: #e74c3c; font-weight: bold; font-size: 16px; }
+        .correct-ans-cell { font-weight: bold; color: #e67e22; }
         .text-center { text-align: center !important; }
         .text-right { text-align: right !important; }
 
-        .rate-container {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 12px;
-        }
-        .rate-text {
-            min-width: 45px;
-            text-align: right;
-            font-weight: bold;
-            font-variant-numeric: tabular-nums;
-        }
-        .rate-bar-bg {
-            width: 80px;
-            background-color: #e2e8f0;
-            height: 10px;
-            border-radius: 5px;
-            overflow: hidden;
-            display: inline-block;
-        }
-        .rate-bar-fill {
-            background-color: #3498db;
-            height: 100%;
-            border-radius: 5px;
-            transition: width 0.5s ease;
+        .rate-container { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+        .rate-text { min-width: 45px; text-align: right; font-weight: bold; font-variant-numeric: tabular-nums; }
+        .rate-bar-bg { width: 80px; background-color: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; display: inline-block; }
+        .rate-bar-fill { background-color: #3498db; height: 100%; border-radius: 5px; transition: width 0.5s ease; }
+
+
+        /* ========================================================= */
+        /* ★【修正】印刷時：ブラウザ本来の挙動（スクロール複数頁）に任せるCSS★ */
+        /* ========================================================= */
+        @media print {
+            @page { 
+                size: A4 portrait; /* A4 縦置き（お好みで指定なしでもブラウザ側で選べます） */
+                margin: 10mm;
+            }
+            html, body {
+                height: auto !important; /* ★画面全体のスクロールロックを解除する */
+                overflow: visible !important; 
+                background-color: #fff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            /* 印刷に不要な操作UIのみ非表示 */
+            .file-inputs-group, .tabs, .control-panel, .print-button {
+                display: none !important;
+            }
+            
+            /* アクティブな画面を縦並び(block)で、複数ページにまたがって自然に印刷する */
+            .view-section { display: none !important; }
+            .view-section.active { 
+                display: block !important; 
+                height: auto !important;
+                padding: 0 !important;
+            }
+            
+            /* コンテナのスクロールを解除し、複数ページに縦スクロール展開させる */
+            .scrollable-view {
+                overflow: visible !important;
+                height: auto !important;
+                display: block !important;
+            }
+            
+            /* 印刷時、枠線が潰れて見えなくならないよう固定高さを確保する */
+            .overall-dashboard {
+                height: 480px !important; /* パソコン画面比率を崩さず印刷するための安全な高さ */
+                margin-bottom: 20px !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 15px !important;
+            }
+            .overall-left { height: 100% !important; }
+            .overall-right { display: flex !important; flex-direction: column !important; gap: 15px !important; height: 100% !important; }
+            .overall-bottom {
+                height: 380px !important;
+                margin-bottom: 0 !important;
+                display: block !important;
+            }
+            
+            .dashboard {
+                height: 400px !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 15px !important;
+            }
+            
+            .dashboard-personal-top {
+                height: 350px !important;
+                margin-bottom: 20px !important;
+                display: grid !important;
+                grid-template-columns: 1fr 2fr !important;
+                gap: 15px !important;
+            }
+            #personal .chart-container:last-child {
+                height: auto !important; /* テーブルは内容量に合わせて2ページ目以降へ自然に流す */
+                overflow: visible !important;
+                display: block !important;
+            }
+
+            /* 枠線の適用（canvas本体へのCSS強制は削除） */
+            .chart-container, .chart-container-large, .chart-container-small {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+            }
+
+            .personal-table th, .personal-table td {
+                padding: 8px 10px !important;
+                font-size: 12px !important;
+            }
+            
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2>岩手県学習定着度状況調査　CBTトライアル　ダッシュボード</h2>
-        <div class="file-upload">
-            <label for="csvFileInput">CSVデータ読み込み：</label>
-            <input type="file" id="csvFileInput" accept=".csv">
+        <h2>学力調査ダッシュボード</h2>
+        <div class="header-actions">
+            <!-- 印刷ボタン -->
+            <button class="print-button" onclick="window.print()">🖨️ この画面を印刷</button>
+            <div class="file-inputs-group">
+                <div class="file-upload">
+                    <label for="csvFileInput">1. 回答CSV：</label>
+                    <input type="file" id="csvFileInput" accept=".csv">
+                </div>
+                <div class="file-upload">
+                    <label for="settingFileInput">2. 設定Excel：</label>
+                    <input type="file" id="settingFileInput" accept=".xlsx">
+                </div>
+            </div>
         </div>
     </div>
 
@@ -206,28 +241,37 @@
 
     <!-- 1. 全体レポート画面 -->
     <div id="overall" class="view-section active">
-        <div class="summary-cards">
-            <div class="card">
-                <h3>総参加人数</h3>
-                <div class="number" id="participantCount">- 人</div>
-            </div>
-            <div class="card">
-                <h3>全体平均点</h3>
-                <div class="number" id="averageScore">- 点</div>
-            </div>
-        </div>
-        <div class="overall-dashboard">
-            <div class="overall-left">
-                <div class="chart-container-large">
-                    <canvas id="questionRateChart"></canvas>
+        <div class="scrollable-view">
+            <div class="summary-cards">
+                <div class="card">
+                    <h3>総参加人数</h3>
+                    <div class="number" id="participantCount">- 人</div>
+                </div>
+                <div class="card">
+                    <h3>全体平均点</h3>
+                    <div class="number" id="averageScore">- 点</div>
                 </div>
             </div>
-            <div class="overall-right">
-                <div class="chart-container-small">
-                    <canvas id="scoreDistChart"></canvas>
+            
+            <div class="overall-dashboard">
+                <div class="overall-left">
+                    <div class="chart-container-large">
+                        <canvas id="questionRateChart"></canvas>
+                    </div>
                 </div>
-                <div class="chart-container-small">
-                    <canvas id="groupAvgChart"></canvas>
+                <div class="overall-right">
+                    <div class="chart-container-small">
+                        <canvas id="scoreDistChart"></canvas>
+                    </div>
+                    <div class="chart-container-small">
+                        <canvas id="groupAvgChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overall-bottom">
+                <div class="chart-container">
+                    <canvas id="categoryRateChart"></canvas>
                 </div>
             </div>
         </div>
@@ -241,7 +285,6 @@
                 <option value="">-- 選択してください --</option>
             </select>
         </div>
-
         <div class="summary-cards">
             <div class="card">
                 <h3>クラス人数</h3>
@@ -256,7 +299,6 @@
                 <div class="number" id="groupMaxScore">- 点</div>
             </div>
         </div>
-
         <div class="dashboard">
             <div class="chart-container">
                 <canvas id="groupQuestionRateChart"></canvas>
@@ -271,20 +313,27 @@
     <div id="personal" class="view-section">
         <div class="control-panel">
             <label for="userSelect">参加者を選択してください：</label>
-            <select id="userSelect" onchange="drawPersonalTable()">
+            <select id="userSelect" onchange="drawPersonalDashboard()">
                 <option value="">-- 選択してください --</option>
             </select>
         </div>
         
-        <div class="dashboard">
-            <div class="card" style="grid-column: span 1; display: flex; flex-direction: column; justify-content: center;">
-                <h3>個人の得点</h3>
-                <div class="number" id="personalScore">- 点</div>
-                <p style="color: #888; margin-top: 15px;">（10問中）</p>
+        <div class="scrollable-view">
+            <div class="dashboard-personal-top">
+                <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+                    <h3 id="personalName" style="font-size: 20px; color: #2c3e50; margin: 0 0 15px 0;">氏名：-</h3>
+                    <p style="color: #888; margin: 0 0 5px 0;">個人の得点</p>
+                    <div class="number" id="personalScore">- 点</div>
+                    <p style="color: #888; margin-top: 15px;">（10問中）</p>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="personalCategoryChart"></canvas>
+                </div>
             </div>
             
-            <div class="chart-container" style="grid-column: span 1;">
-                <h3 style="margin-top: 0; color: #555;">設問別解答一覧（個人 vs 全体平均）</h3>
+            <div class="chart-container" style="flex: 1; height: auto;">
+                <h3 class="personal-table-header" style="margin-top: 0; color: #555;">設問別解答一覧（個人 vs 全体平均）</h3>
                 <table class="personal-table">
                     <thead>
                         <tr>
@@ -309,20 +358,30 @@
 
     <!-- ライブラリの読み込み -->
     <script src="./lib/papaparse.min.js"></script>
+    <script src="./lib/xlsx.full.min.js"></script>
     <script src="./lib/chart.umd.min.js"></script>
 
     <script>
         let charts = {};
         let allData = [];
         let overallQuestionRates = [];
+        
+        let studentMap = {};    
+        let categoryMap = {};   
+        
+        let categoriesList = [];
+        let overallCategoryRates = [];
 
-        // 正答マスターデータ
         const correctAnswersMaster = {
             1: 'ア', 2: 'イ', 3: 'ア', 4: 'ア', 5: 'イ',
             6: 'ウ', 7: 'ア', 8: 'イ', 9: 'バス', 10: '月曜日'
         };
 
-        // レーダーチャートの頂点に数値を常時表示するためのカスタムプラグイン
+        function cleanId(id) {
+            if (id === undefined || id === null) return '';
+            return String(id).replace(/^0+/, '').trim();
+        }
+
         const radarValueLabelPlugin = {
             id: 'radarValueLabel',
             afterDatasetsDraw(chart) {
@@ -334,45 +393,88 @@
                         const value = dataset.data[index];
                         if (value === undefined || value === null) return;
                         const text = value + '%';
-                        
                         ctx.fillStyle = '#2c3e50';
                         ctx.font = 'bold 10px sans-serif';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'bottom';
-                        
                         ctx.fillText(text, point.x, point.y - 7);
                     });
                 });
             }
         };
 
-        // タブ切り替え処理
         function switchTab(tabId) {
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
-            
             document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
             document.getElementById(tabId).classList.add('active');
         }
 
-        // CSV読み込み処理
         document.getElementById('csvFileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             Papa.parse(file, {
-                header: true,
-                skipEmptyLines: true,
+                header: true, skipEmptyLines: true,
                 complete: function(results) {
                     allData = results.data;
-                    processOverallData();
-                    setupGroupView();
-                    setupPersonalView();
+                    updateAllDashboards();
                 }
             });
         });
 
-        // 1. 全体データの処理と描画
+        document.getElementById('settingFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    const memberSheet = workbook.Sheets["受験者名簿"];
+                    if (memberSheet) {
+                        const memberJson = XLSX.utils.sheet_to_json(memberSheet);
+                        studentMap = {};
+                        memberJson.forEach(row => {
+                            if (!row) return;
+                            const rawId = row["答案番号"] !== undefined ? row["答案番号"] : (row["答案No"] || row["ID"]);
+                            const rawName = row["氏名"] !== undefined ? row["氏名"] : (row["名前"] || row["氏名"]);
+                            if (rawId !== undefined && rawName !== undefined) {
+                                studentMap[cleanId(String(rawId))] = String(rawName).trim();
+                            }
+                        });
+                    }
+
+                    const categorySheet = workbook.Sheets["問題カテゴリ"];
+                    if (categorySheet) {
+                        const categoryJson = XLSX.utils.sheet_to_json(categorySheet);
+                        categoryMap = {};
+                        categoryJson.forEach(row => {
+                            if (!row) return;
+                            const qNum = row["問題番号"] !== undefined ? String(row["問題番号"]).trim() : "";
+                            const catName = row["カテゴリ"] !== undefined ? String(row["カテゴリ"]).trim() : "";
+                            if (qNum && catName) categoryMap[qNum] = catName;
+                        });
+                    }
+                    updateAllDashboards();
+                } catch (err) {
+                    alert("Excelの読み込み中にエラーが発生しました。");
+                    console.error(err);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function updateAllDashboards() {
+            if (allData.length > 0) {
+                processOverallData();
+                calculateCategoryStats();
+                drawCategoryDashboard();
+                setupGroupView();
+                setupPersonalView();
+            }
+        }
+
         function processOverallData() {
             let totalScore = 0;
             let participantCount = allData.length;
@@ -389,12 +491,13 @@
                     }
                 }
                 totalScore += score;
-
                 let group = row['所属グループ'];
-                if (!groupStats[group]) groupStats[group] = { totalScore: 0, count: 0 };
-                groupStats[group].totalScore += score;
-                groupStats[group].count += 1;
-
+                if (group) {
+                    group = String(group).trim();
+                    if (!groupStats[group]) groupStats[group] = { totalScore: 0, count: 0 };
+                    groupStats[group].totalScore += score;
+                    groupStats[group].count += 1;
+                }
                 if (score <= 2) scoreDistribution['0-2点']++;
                 else if (score <= 4) scoreDistribution['3-4点']++;
                 else if (score <= 6) scoreDistribution['5-6点']++;
@@ -403,43 +506,71 @@
             });
 
             overallQuestionRates = questionCorrectCounts.map(count => (count / participantCount * 100).toFixed(1));
-
             document.getElementById('participantCount').textContent = participantCount + ' 人';
             document.getElementById('averageScore').textContent = (totalScore / participantCount).toFixed(1) + ' 点';
 
             let questionLabels = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10'];
             
-            const overallRateDataset = [{
-                label: '全体平均正答率 (%)',
-                data: overallQuestionRates,
-                borderColor: '#3498db',
-                backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                borderWidth: 2,
-                pointBackgroundColor: '#3498db'
-            }];
+            const overallRateDataset = [{ label: '全体平均正答率 (%)', data: overallQuestionRates, borderColor: '#3498db', backgroundColor: 'rgba(52, 152, 219, 0.2)', borderWidth: 2, pointBackgroundColor: '#3498db' }];
             drawChart('questionRateChart', 'radar', questionLabels, overallRateDataset, '学年全体 問題別正答率', [radarValueLabelPlugin]);
-            
             drawChart('scoreDistChart', 'bar', Object.keys(scoreDistribution), [{ label: '人数 (人)', data: Object.values(scoreDistribution), backgroundColor: '#2ecc71' }], '得点分布');
-            
             let groupLabels = Object.keys(groupStats);
             let groupAverages = groupLabels.map(g => (groupStats[g].totalScore / groupStats[g].count).toFixed(1));
             drawChart('groupAvgChart', 'bar', groupLabels, [{ label: '平均点 (点)', data: groupAverages, backgroundColor: '#9b59b6' }], 'グループ別 平均点');
         }
 
-        // 2. クラス画面の初期化（プルダウン生成）
+        function calculateCategoryStats() {
+            if (Object.keys(categoryMap).length === 0) return;
+
+            categoriesList = [...new Set(Object.values(categoryMap))];
+            let catCorrectCounts = {};
+            let catQuestionCounts = {};
+            categoriesList.forEach(cat => { catCorrectCounts[cat] = 0; catQuestionCounts[cat] = 0; });
+
+            allData.forEach(row => {
+                for (let i = 1; i <= 10; i++) {
+                    const qName = `Q${i}`;
+                    const cat = categoryMap[qName];
+                    if (cat) {
+                        const isCorrect = parseInt(row[`Q${i}_正誤`], 10);
+                        catQuestionCounts[cat] += 1;
+                        if (isCorrect === 1) catCorrectCounts[cat] += 1;
+                    }
+                }
+            });
+
+            overallCategoryRates = categoriesList.map(cat => {
+                const total = catQuestionCounts[cat];
+                const correct = catCorrectCounts[cat];
+                return total > 0 ? ((correct / total) * 100).toFixed(1) : 0;
+            });
+        }
+
+        function drawCategoryDashboard() {
+            if (categoriesList.length === 0) {
+                if (charts['categoryRateChart']) charts['categoryRateChart'].destroy();
+                return;
+            }
+            const catDataset = [{
+                label: '分野別 平均正答率 (%)',
+                data: overallCategoryRates,
+                borderColor: '#e67e22',
+                backgroundColor: 'rgba(230, 126, 34, 0.2)',
+                borderWidth: 2,
+                pointBackgroundColor: '#e67e22'
+            }];
+            drawChart('categoryRateChart', 'radar', categoriesList, catDataset, '分野別 平均正答率 (カテゴリ比較)', [radarValueLabelPlugin]);
+        }
+
         function setupGroupView() {
             const select = document.getElementById('groupSelect');
             select.innerHTML = '<option value="">-- 選択してください --</option>';
-
-            const groups = [...new Set(allData.map(row => row['所属グループ']))];
-            
+            const groups = [...new Set(allData.map(row => row['所属グループ'] ? String(row['所属グループ']).trim() : '').filter(Boolean))];
             groups.forEach(group => {
                 let option = document.createElement('option');
-                option.value = group;
-                option.textContent = group;
+                option.value = group; option.textContent = group;
                 select.appendChild(option);
             });
-
             document.getElementById('groupParticipantCount').textContent = '- 人';
             document.getElementById('groupAverageScore').textContent = '- 点';
             document.getElementById('groupMaxScore').textContent = '- 点';
@@ -447,38 +578,23 @@
             if (charts['groupScoreDistChart']) charts['groupScoreDistChart'].destroy();
         }
 
-        // 2. クラスダッシュボードの集計と描画
         function drawGroupDashboard() {
             const selectedGroup = document.getElementById('groupSelect').value;
-            if (selectedGroup === "") {
-                setupGroupView();
-                return;
-            }
-
-            const groupMembers = allData.filter(row => row['所属グループ'] === selectedGroup);
+            if (selectedGroup === "") { setupGroupView(); return; }
+            const groupMembers = allData.filter(row => row['所属グループ'] && String(row['所属グループ']).trim() === selectedGroup);
             
-            let totalScore = 0;
-            let maxScore = 0;
-            let participantCount = groupMembers.length;
+            let totalScore = 0; let maxScore = 0; let participantCount = groupMembers.length;
             let questionCorrectCounts = Array(10).fill(0);
             let scoreDistribution = { '0-2点':0, '3-4点':0, '5-6点':0, '7-8点':0, '9-10点':0 };
 
             groupMembers.forEach(row => {
                 let score = 0;
                 for (let i = 1; i <= 10; i++) {
-                    if (parseInt(row[`Q${i}_正誤`], 10) === 1) {
-                        score += 1;
-                        questionCorrectCounts[i-1] += 1;
-                    }
+                    if (parseInt(row[`Q${i}_正誤`], 10) === 1) { score += 1; questionCorrectCounts[i-1] += 1; }
                 }
                 totalScore += score;
                 if (score > maxScore) maxScore = score;
-
-                if (score <= 2) scoreDistribution['0-2点']++;
-                else if (score <= 4) scoreDistribution['3-4点']++;
-                else if (score <= 6) scoreDistribution['5-6点']++;
-                else if (score <= 8) scoreDistribution['7-8点']++;
-                else scoreDistribution['9-10点']++;
+                if (score <= 2) scoreDistribution['0-2点']++; else if (score <= 4) scoreDistribution['3-4点']++; else if (score <= 6) scoreDistribution['5-6点']++; else if (score <= 8) scoreDistribution['7-8点']++; else scoreDistribution['9-10点']++;
             });
 
             const groupQuestionRates = questionCorrectCounts.map(count => (count / participantCount * 100).toFixed(1));
@@ -489,152 +605,165 @@
             document.getElementById('groupMaxScore').textContent = maxScore + ' 点';
 
             let questionLabels = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10'];
-
             const datasets = [
-                {
-                    label: '全体平均正答率 (%)',
-                    data: overallQuestionRates,
-                    borderColor: 'rgba(52, 152, 219, 0.8)',
-                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                    borderWidth: 2,
-                    pointBackgroundColor: '#3498db'
-                },
-                {
-                    label: `${selectedGroup} 正答率 (%)`,
-                    data: groupQuestionRates,
-                    borderColor: 'rgba(155, 89, 182, 0.8)',
-                    backgroundColor: 'rgba(155, 89, 182, 0.25)',
-                    borderWidth: 2,
-                    pointBackgroundColor: '#8e44ad'
-                }
+                { label: '全体平均正答率 (%)', data: overallQuestionRates, borderColor: 'rgba(52, 152, 219, 0.8)', backgroundColor: 'rgba(52, 152, 219, 0.1)', borderWidth: 2, pointBackgroundColor: '#3498db' },
+                { label: `${selectedGroup} 正答率 (%)`, data: groupQuestionRates, borderColor: 'rgba(155, 89, 182, 0.8)', backgroundColor: 'rgba(155, 89, 182, 0.25)', borderWidth: 2, pointBackgroundColor: '#8e44ad' }
             ];
-            
             drawChart('groupQuestionRateChart', 'radar', questionLabels, datasets, 'クラス別正答率（vs 全体平均）');
-
-            // 得点分布（棒グラフ）
-            const distDataset = [{
-                label: '人数 (人)',
-                data: Object.values(scoreDistribution),
-                backgroundColor: 'rgba(46, 204, 113, 0.7)',
-                borderColor: '#27ae60',
-                borderWidth: 1
-            }];
-            drawChart('groupScoreDistChart', 'bar', Object.keys(scoreDistribution), distDataset, 'クラス内 得点分布');
+            drawChart('groupScoreDistChart', 'bar', Object.keys(scoreDistribution), [{ label: '人数 (人)', data: Object.values(scoreDistribution), backgroundColor: 'rgba(46, 204, 113, 0.7)', borderColor: '#27ae60', borderWidth: 1 }], 'クラス内 得点分布');
         }
 
-        // 3. 個人用プルダウンのセットアップ
         function setupPersonalView() {
             const select = document.getElementById('userSelect');
             select.innerHTML = '<option value="">-- 選択してください --</option>';
-            
             allData.forEach((row, index) => {
+                if (!row) return;
                 let option = document.createElement('option');
                 option.value = index; 
-                option.textContent = `${row['所属グループ']} - ${row['参加者固有番号']}`;
+                const id = row['答案番号'] ? String(row['答案番号']).trim() : '';
+                const studentName = studentMap[cleanId(id)] ? studentMap[cleanId(id)] : `番号:${row['参加者固有番号'] || id}`;
+                option.textContent = `${row['所属グループ']} - ${studentName}`;
                 select.appendChild(option);
             });
-            
-            document.getElementById('personalTableBody').innerHTML = `
-                <tr>
-                    <td colspan="5" style="text-align: center; color: #999; padding: 40px 0;">
-                        参加者を選択するとデータが表示されます
-                    </td>
-                </tr>
-            `;
+            document.getElementById('personalTableBody').innerHTML = `<tr><td colspan="5" style="text-align: center; color: #999; padding: 40px 0;">参加者を選択するとデータが表示されます</td></tr>`;
             document.getElementById('personalScore').textContent = '- 点';
+            document.getElementById('personalName').textContent = '氏名：-';
+            if (charts['personalCategoryChart']) charts['personalCategoryChart'].destroy();
         }
 
-        // 3. 個人用テーブルの描画
-        function drawPersonalTable() {
+        function drawPersonalDashboard() {
             const selectedIndex = document.getElementById('userSelect').value;
-            if (selectedIndex === "") {
-                setupPersonalView();
-                return;
-            }
+            if (selectedIndex === "") { setupPersonalView(); return; }
 
             const userData = allData[selectedIndex];
+            if (!userData) return;
+            
             const tableBody = document.getElementById('personalTableBody');
             tableBody.innerHTML = '';
             
             let personalScore = 0;
-            
+            const id = userData['答案番号'] ? String(userData['答案番号']).trim() : '';
+            const studentName = studentMap[cleanId(id)] ? studentMap[cleanId(id)] : `（名簿未登録: 答案番号 ${id}）`;
+            document.getElementById('personalName').textContent = studentName + ' さん';
+
+            let hasCategory = categoriesList.length > 0;
+            let personalCatCorrect = {};
+            let personalCatTotal = {};
+            if (hasCategory) {
+                categoriesList.forEach(cat => { personalCatCorrect[cat] = 0; personalCatTotal[cat] = 0; });
+            }
+
             for (let i = 1; i <= 10; i++) {
-                let answer = userData[`Q${i}_解答`];
+                let answer = userData[`Q${i}_解答`] !== undefined ? userData[`Q${i}_解答`] : '';
+                
+                // ★構文エラーをクリーンに修正：タイポメモを完全に撤廃しました
                 let isCorrect = parseInt(userData[`Q${i}_正誤`], 10);
+                if (isNaN(isCorrect)) isCorrect = 0;
                 
-                let resultMark = '';
-                let resultClass = '';
-                let displayCorrectAnswer = '';
-                
-                if (isCorrect === 1) {
-                    personalScore += 1;
-                    resultMark = '〇';
-                    resultClass = 'badge-correct';
-                    displayCorrectAnswer = '-';
-                } else {
-                    resultMark = '×';
-                    resultClass = 'badge-incorrect';
-                    displayCorrectAnswer = correctAnswersMaster[i] || '不明';
+                if (hasCategory) {
+                    const cat = categoryMap[`Q${i}`];
+                    if (cat) {
+                        personalCatTotal[cat] += 1;
+                        if (isCorrect === 1) personalCatCorrect[cat] += 1;
+                    }
                 }
 
+                let resultMark = ''; let resultClass = ''; let displayCorrectAnswer = '';
+                if (isCorrect === 1) {
+                    personalScore += 1; resultMark = '〇'; resultClass = 'badge-correct'; displayCorrectAnswer = '-';
+                } else {
+                    resultMark = '×'; resultClass = 'badge-incorrect'; displayCorrectAnswer = correctAnswersMaster[i] || '不明';
+                }
                 let overallRate = overallQuestionRates[i-1];
 
                 let row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>Q${i}</td>
-                    <td>${answer}</td>
-                    <td class="text-center ${resultClass}">${resultMark}</td>
+                    <td>Q${i}</td><td>${answer}</td><td class="text-center ${resultClass}">${resultMark}</td>
                     <td class="${isCorrect !== 1 ? 'correct-ans-cell' : ''}">${displayCorrectAnswer}</td>
                     <td>
                         <div class="rate-container">
                             <span class="rate-text">${overallRate}%</span>
-                            <div class="rate-bar-bg">
-                                <div class="rate-bar-fill" style="width: ${overallRate}%;"></div>
-                            </div>
+                            <div class="rate-bar-bg"><div class="rate-bar-fill" style="width: ${overallRate}%;"></div></div>
                         </div>
                     </td>
                 `;
                 tableBody.appendChild(row);
             }
-
             document.getElementById('personalScore').textContent = personalScore + ' 点';
+
+            if (hasCategory) {
+                let personalCategoryRates = categoriesList.map(cat => {
+                    const total = personalCatTotal[cat];
+                    const correct = personalCatCorrect[cat];
+                    return total > 0 ? ((correct / total) * 100).toFixed(1) : 0;
+                });
+
+                const datasets = [
+                    {
+                        label: '全体平均 (%)',
+                        data: overallCategoryRates,
+                        borderColor: 'rgba(52, 152, 219, 0.8)',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#3498db'
+                    },
+                    {
+                        label: '本人の正答率 (%)',
+                        data: personalCategoryRates,
+                        borderColor: 'rgba(231, 76, 60, 0.8)',
+                        backgroundColor: 'rgba(231, 76, 60, 0.25)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#e74c3c'
+                    }
+                ];
+                drawChart('personalCategoryChart', 'radar', categoriesList, datasets, '分野別正答率（個人 vs 全体平均）', [radarValueLabelPlugin]);
+            } else {
+                if (charts['personalCategoryChart']) charts['personalCategoryChart'].destroy();
+            }
         }
 
-        // 共通のグラフ描画関数
         function drawChart(canvasId, type, labels, datasets, titleText, customPlugins = []) {
             const ctx = document.getElementById(canvasId).getContext('2d');
             if (charts[canvasId]) charts[canvasId].destroy();
 
             let scaleOptions = {};
             if (type === 'radar') {
-                scaleOptions = { 
-                    r: { 
-                        min: 0, 
-                        max: 100, 
-                        ticks: { stepSize: 20 } 
-                    } 
-                };
+                scaleOptions = { r: { min: 0, max: 100, ticks: { stepSize: 20 } } };
             } else {
                 scaleOptions = { y: { beginAtZero: true } };
             }
 
             charts[canvasId] = new Chart(ctx, {
                 type: type,
-                data: {
-                    labels: labels,
-                    datasets: datasets
-                },
+                data: { labels: labels, datasets: datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        title: { display: true, text: titleText }
-                    },
+                    plugins: { title: { display: true, text: titleText } },
                     scales: scaleOptions
                 },
                 plugins: customPlugins
             });
         }
+
+        // =========================================================================
+        // ★印刷時にグラフを再計算させる処理
+        // =========================================================================
+        window.addEventListener('beforeprint', () => {
+            for (let id in charts) {
+                if (charts[id]) {
+                    charts[id].resize();
+                }
+            }
+        });
+        
+        window.addEventListener('afterprint', () => {
+            for (let id in charts) {
+                if (charts[id]) {
+                    charts[id].resize();
+                }
+            }
+        });
     </script>
 </body>
 </html>
