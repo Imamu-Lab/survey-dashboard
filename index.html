@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学力調査ダッシュボード</title>
     <style>
-        /* ========================================================= */
-        /* ★完全復活★ 画面表示用の基本スタイル (100dvh 可変追従モデル) */
-        /* ========================================================= */
         html, body {
             height: 100dvh;
             margin: 0;
@@ -15,6 +12,7 @@
             overflow: hidden;
             box-sizing: border-box;
         }
+
         body {
             font-family: sans-serif;
             background-color: #f4f7f6;
@@ -22,25 +20,33 @@
             display: flex;
             flex-direction: column;
         }
-        
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 15px; 
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
             flex-shrink: 0;
         }
+
         .header-actions {
             display: flex;
             gap: 15px;
             align-items: center;
         }
+
         .file-inputs-group {
             display: flex;
             gap: 15px;
         }
-        .file-upload { background: #fff; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        
+
+        .file-upload {
+            background: #fff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
         .print-button {
             background-color: #2c3e50;
             color: white;
@@ -51,27 +57,72 @@
             cursor: pointer;
             font-weight: bold;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transition: background-color 0.2s;
         }
-        .print-button:hover { background-color: #1a252f; }
 
-        .tabs { margin-bottom: 15px; border-bottom: 2px solid #ddd; flex-shrink: 0; }
-        .tab-button { background: none; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; color: #666; }
-        .tab-button.active { border-bottom: 3px solid #3498db; color: #3498db; font-weight: bold; }
+        .print-button:hover {
+            background-color: #1a252f;
+        }
 
-        .view-section { 
-            display: none; 
+        .tabs {
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ddd;
+            flex-shrink: 0;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .tab-button.active {
+            border-bottom: 3px solid #3498db;
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .view-section {
+            display: none;
             flex-direction: column;
-            flex: 1; 
+            flex: 1;
             min-height: 0;
         }
-        .view-section.active { display: flex; }
 
-        .summary-cards { display: flex; gap: 15px; margin-bottom: 15px; flex-shrink: 0; }
-        .card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; text-align: center; }
-        .card h3 { margin: 0 0 5px 0; color: #666; font-size: 14px; }
-        .card .number { font-size: 28px; font-weight: bold; color: #2c3e50; }
-        
+        .view-section.active {
+            display: flex;
+        }
+
+        .summary-cards {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+
+        .card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex: 1;
+            text-align: center;
+        }
+
+        .card h3 {
+            margin: 0 0 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .card .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
         .scrollable-view {
             flex: 1;
             overflow-y: auto;
@@ -81,17 +132,59 @@
             min-height: 0;
         }
 
-        /* パソコン画面用の美しい2列左右均等レイアウト（左：大、右：小縦並び2段） */
-        .overall-dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; height: 580px; flex-shrink: 0; }
-        .overall-left { height: 100%; }
-        .overall-right { display: flex; flex-direction: column; gap: 15px; height: 100%; }
-        
-        .chart-container-large { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); height: 100%; box-sizing: border-box; position: relative; }
-        .chart-container-small { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-height: 0; box-sizing: border-box; position: relative; }
-        .overall-bottom { height: 380px; flex-shrink: 0; }
+        .overall-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            height: 580px;
+            flex-shrink: 0;
+        }
 
-        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: stretch; flex: 1; min-height: 0; }
-        
+        .overall-left {
+            height: 100%;
+        }
+
+        .overall-right {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+        }
+
+        .chart-container-large,
+        .chart-container-small,
+        .chart-container {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .chart-container-large {
+            height: 100%;
+        }
+
+        .chart-container-small {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .overall-bottom {
+            height: 380px;
+            flex-shrink: 0;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            align-items: stretch;
+            flex: 1;
+            min-height: 0;
+        }
+
         .dashboard-personal-top {
             display: grid;
             grid-template-columns: 1fr 2fr;
@@ -100,87 +193,189 @@
             flex-shrink: 0;
         }
 
-        .chart-container { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); height: 100%; box-sizing: border-box; position: relative; overflow-y: auto; }
-        
-        .control-panel { background: #fff; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; }
-        select { padding: 6px; font-size: 15px; border-radius: 4px; }
+        .chart-container {
+            height: 100%;
+            overflow-y: auto;
+        }
 
-        /* テーブル用スタイル */
-        .personal-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .personal-table th, .personal-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e0e0e0; font-size: 14px; }
-        .personal-table th { background-color: #f8f9fa; color: #555; font-weight: bold; position: sticky; top: 0; z-index: 10; }
-        .personal-table tr:hover { background-color: #fcfcfc; }
-        .badge-correct { color: #2ecc71; font-weight: bold; font-size: 16px; }
-        .badge-incorrect { color: #e74c3c; font-weight: bold; font-size: 16px; }
-        .correct-ans-cell { font-weight: bold; color: #e67e22; }
-        .text-center { text-align: center !important; }
-        .text-right { text-align: right !important; }
+        .control-panel {
+            background: #fff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        .rate-container { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
-        .rate-text { min-width: 45px; text-align: right; font-weight: bold; font-variant-numeric: tabular-nums; }
-        .rate-bar-bg { width: 80px; background-color: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; display: inline-block; }
-        .rate-bar-fill { background-color: #3498db; height: 100%; border-radius: 5px; transition: width 0.5s ease; }
+        select {
+            padding: 6px;
+            font-size: 15px;
+            border-radius: 4px;
+        }
 
+        .personal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
 
-        /* ========================================================= */
-        /* ★【修正】印刷時：ブラウザ本来の挙動（スクロール複数頁）に任せるCSS★ */
-        /* ========================================================= */
+        .personal-table th,
+        .personal-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+
+        .personal-table th {
+            background-color: #f8f9fa;
+            color: #555;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .personal-table tr:hover {
+            background-color: #fcfcfc;
+        }
+
+        .badge-correct {
+            color: #2ecc71;
+            font-weight: bold;
+            font-size: 16px;
+            white-space: nowrap;
+        }
+
+        .badge-incorrect {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .badge-noanswer {
+            color: #7f8c8d;
+            font-weight: bold;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .correct-ans-cell {
+            font-weight: bold;
+            color: #e67e22;
+        }
+
+        .text-center {
+            text-align: center !important;
+        }
+
+        .text-right {
+            text-align: right !important;
+        }
+
+        .rate-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .rate-text {
+            min-width: 45px;
+            text-align: right;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .rate-bar-bg {
+            width: 80px;
+            background-color: #e2e8f0;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .rate-bar-fill {
+            background-color: #3498db;
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
         @media print {
-            @page { 
-                size: A4 portrait; /* A4 縦置き（お好みで指定なしでもブラウザ側で選べます） */
+            @page {
+                size: A4 portrait;
                 margin: 10mm;
             }
+
             html, body {
-                height: auto !important; /* ★画面全体のスクロールロックを解除する */
-                overflow: visible !important; 
+                height: auto !important;
+                overflow: visible !important;
                 background-color: #fff !important;
                 padding: 0 !important;
                 margin: 0 !important;
             }
-            
-            /* 印刷に不要な操作UIのみ非表示 */
-            .file-inputs-group, .tabs, .control-panel, .print-button {
+
+            .file-inputs-group,
+            .tabs,
+            .control-panel,
+            .print-button {
                 display: none !important;
             }
-            
-            /* アクティブな画面を縦並び(block)で、複数ページにまたがって自然に印刷する */
-            .view-section { display: none !important; }
-            .view-section.active { 
-                display: block !important; 
+
+            .view-section {
+                display: none !important;
+            }
+
+            .view-section.active {
+                display: block !important;
                 height: auto !important;
                 padding: 0 !important;
             }
-            
-            /* コンテナのスクロールを解除し、複数ページに縦スクロール展開させる */
+
             .scrollable-view {
                 overflow: visible !important;
                 height: auto !important;
                 display: block !important;
             }
-            
-            /* 印刷時、枠線が潰れて見えなくならないよう固定高さを確保する */
+
             .overall-dashboard {
-                height: 480px !important; /* パソコン画面比率を崩さず印刷するための安全な高さ */
+                height: 480px !important;
                 margin-bottom: 20px !important;
                 display: grid !important;
                 grid-template-columns: 1fr 1fr !important;
                 gap: 15px !important;
             }
-            .overall-left { height: 100% !important; }
-            .overall-right { display: flex !important; flex-direction: column !important; gap: 15px !important; height: 100% !important; }
+
+            .overall-left {
+                height: 100% !important;
+            }
+
+            .overall-right {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 15px !important;
+                height: 100% !important;
+            }
+
             .overall-bottom {
                 height: 380px !important;
                 margin-bottom: 0 !important;
                 display: block !important;
             }
-            
+
             .dashboard {
                 height: 400px !important;
                 display: grid !important;
                 grid-template-columns: 1fr 1fr !important;
                 gap: 15px !important;
             }
-            
+
             .dashboard-personal-top {
                 height: 350px !important;
                 margin-bottom: 20px !important;
@@ -188,23 +383,26 @@
                 grid-template-columns: 1fr 2fr !important;
                 gap: 15px !important;
             }
+
             #personal .chart-container:last-child {
-                height: auto !important; /* テーブルは内容量に合わせて2ページ目以降へ自然に流す */
+                height: auto !important;
                 overflow: visible !important;
                 display: block !important;
             }
 
-            /* 枠線の適用（canvas本体へのCSS強制は削除） */
-            .chart-container, .chart-container-large, .chart-container-small {
+            .chart-container,
+            .chart-container-large,
+            .chart-container-small {
                 box-shadow: none !important;
                 border: 1px solid #ccc !important;
             }
 
-            .personal-table th, .personal-table td {
+            .personal-table th,
+            .personal-table td {
                 padding: 8px 10px !important;
                 font-size: 12px !important;
             }
-            
+
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
@@ -217,7 +415,6 @@
     <div class="header">
         <h2>学力調査ダッシュボード</h2>
         <div class="header-actions">
-            <!-- 印刷ボタン -->
             <button class="print-button" onclick="window.print()">🖨️ この画面を印刷</button>
             <div class="file-inputs-group">
                 <div class="file-upload">
@@ -232,14 +429,12 @@
         </div>
     </div>
 
-    <!-- タブメニュー -->
     <div class="tabs">
         <button class="tab-button active" onclick="switchTab('overall')">全体レポート</button>
         <button class="tab-button" onclick="switchTab('group')">クラスレポート</button>
         <button class="tab-button" onclick="switchTab('personal')">個人レポート</button>
     </div>
 
-    <!-- 1. 全体レポート画面 -->
     <div id="overall" class="view-section active">
         <div class="scrollable-view">
             <div class="summary-cards">
@@ -252,7 +447,7 @@
                     <div class="number" id="averageScore">- 点</div>
                 </div>
             </div>
-            
+
             <div class="overall-dashboard">
                 <div class="overall-left">
                     <div class="chart-container-large">
@@ -271,13 +466,12 @@
 
             <div class="overall-bottom">
                 <div class="chart-container">
-                    <canvas id="categoryRateChart"></canvas>
+                    <canvas id="areaRateChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 2. クラスレポート画面 -->
     <div id="group" class="view-section">
         <div class="control-panel">
             <label for="groupSelect">クラスを選択してください：</label>
@@ -285,6 +479,7 @@
                 <option value="">-- 選択してください --</option>
             </select>
         </div>
+
         <div class="summary-cards">
             <div class="card">
                 <h3>クラス人数</h3>
@@ -299,6 +494,7 @@
                 <div class="number" id="groupMaxScore">- 点</div>
             </div>
         </div>
+
         <div class="dashboard">
             <div class="chart-container">
                 <canvas id="groupQuestionRateChart"></canvas>
@@ -309,7 +505,6 @@
         </div>
     </div>
 
-    <!-- 3. 個人レポート画面 -->
     <div id="personal" class="view-section">
         <div class="control-panel">
             <label for="userSelect">参加者を選択してください：</label>
@@ -317,21 +512,21 @@
                 <option value="">-- 選択してください --</option>
             </select>
         </div>
-        
+
         <div class="scrollable-view">
             <div class="dashboard-personal-top">
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
                     <h3 id="personalName" style="font-size: 20px; color: #2c3e50; margin: 0 0 15px 0;">氏名：-</h3>
                     <p style="color: #888; margin: 0 0 5px 0;">個人の得点</p>
                     <div class="number" id="personalScore">- 点</div>
-                    <p style="color: #888; margin-top: 15px;">（10問中）</p>
+                    <p style="color: #888; margin-top: 15px;">（<span id="personalMaxQuestionCount">-</span>問中）</p>
                 </div>
-                
+
                 <div class="chart-container">
-                    <canvas id="personalCategoryChart"></canvas>
+                    <canvas id="personalAreaChart"></canvas>
                 </div>
             </div>
-            
+
             <div class="chart-container" style="flex: 1; height: auto;">
                 <h3 class="personal-table-header" style="margin-top: 0; color: #555;">設問別解答一覧（個人 vs 全体平均）</h3>
                 <table class="personal-table">
@@ -339,7 +534,7 @@
                         <tr>
                             <th>問題</th>
                             <th>自分の回答内容</th>
-                            <th class="text-center">正誤</th>
+                            <th class="text-center">判定</th>
                             <th>正答（間違えた場合）</th>
                             <th class="text-right" style="width: 150px;">全体の正答率</th>
                         </tr>
@@ -364,35 +559,259 @@
     <script>
         let charts = {};
         let allData = [];
-        let overallQuestionRates = [];
-        
-        let studentMap = {};    
-        let categoryMap = {};   
-        
-        let categoriesList = [];
-        let overallCategoryRates = [];
 
-        const correctAnswersMaster = {
-            1: 'ア', 2: 'イ', 3: 'ア', 4: 'ア', 5: 'イ',
-            6: 'ウ', 7: 'ア', 8: 'イ', 9: 'バス', 10: '月曜日'
-        };
+        let studentMap = {};
+        let studentGroupMap = {};
+
+        let questionList = [];
+        let areaMap = {};
+        let correctAnswersMaster = {};
+        let answerDisplayMap = {};
+
+        let areasList = [];
+        let overallQuestionRates = [];
+        let overallAreaRates = [];
+
+        // 全体得点率の四分位情報を保持する
+        let overallQuartileInfo = null;
 
         function cleanId(id) {
             if (id === undefined || id === null) return '';
             return String(id).replace(/^0+/, '').trim();
         }
 
+        function escapeHtml(value) {
+            if (value === undefined || value === null) return '';
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function normalizeHeaderText(value) {
+            if (value === undefined || value === null) return '';
+
+            return String(value)
+                .replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
+                    return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+                })
+                .replace(/\s+/g, '')
+                .trim();
+        }
+
+        function getCellValue(row, names) {
+            if (!row) return '';
+
+            const normalizedRow = {};
+
+            Object.keys(row).forEach(key => {
+                normalizedRow[normalizeHeaderText(key)] = row[key];
+            });
+
+            for (const name of names) {
+                const normalizedName = normalizeHeaderText(name);
+
+                if (
+                    normalizedRow[normalizedName] !== undefined &&
+                    normalizedRow[normalizedName] !== null
+                ) {
+                    return normalizedRow[normalizedName];
+                }
+            }
+
+            return '';
+        }
+
+        function normalizeQuestionId(value) {
+            if (value === undefined || value === null) return '';
+
+            let text = String(value).trim();
+
+            text = text.replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
+                return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+            });
+
+            text = text.replace(/^q/i, 'Q');
+
+            const match = text.match(/^Q0*(\d+)$/);
+            if (match) {
+                text = 'Q' + parseInt(match[1], 10);
+            }
+
+            return text;
+        }
+
+        function getAnswerType(row, qName) {
+            const value = parseInt(row[`${qName}_正誤`], 10);
+            return isNaN(value) ? 0 : value;
+        }
+
+        function isCorrect(row, qName) {
+            return getAnswerType(row, qName) === 1;
+        }
+
+        function isDisplayOn(value) {
+            if (value === undefined || value === null || value === '') return true;
+
+            const text = String(value).trim();
+
+            if (text === '0') return false;
+            if (text === 'false') return false;
+            if (text === 'FALSE') return false;
+            if (text === '非表示') return false;
+            if (text === 'しない') return false;
+            if (text === '表示しない') return false;
+
+            return true;
+        }
+
+        function getCorrectAnswerText(qName) {
+            if (answerDisplayMap[qName] === false) {
+                return '別途資料参照';
+            }
+
+            const answer = correctAnswersMaster[qName];
+
+            if (answer !== undefined && answer !== null && String(answer).trim() !== '') {
+                return String(answer).trim();
+            }
+
+            return '不明';
+        }
+
+        function inferQuestionListFromCsv() {
+            if (!allData || allData.length === 0) return [];
+
+            const firstRow = allData[0];
+            const found = [];
+
+            Object.keys(firstRow).forEach(key => {
+                const normalizedKey = normalizeHeaderText(key);
+                const match = normalizedKey.match(/^(Q\d+)_正誤$/);
+
+                if (match) {
+                    found.push(normalizeQuestionId(match[1]));
+                }
+            });
+
+            found.sort((a, b) => {
+                const na = parseInt(a.replace('Q', ''), 10);
+                const nb = parseInt(b.replace('Q', ''), 10);
+                return na - nb;
+            });
+
+            return found;
+        }
+
+        function getQuestionLabels() {
+            return questionList.length > 0 ? questionList : inferQuestionListFromCsv();
+        }
+
+        function calculateScore(row, questions) {
+            let score = 0;
+
+            questions.forEach(qName => {
+                if (isCorrect(row, qName)) {
+                    score += 1;
+                }
+            });
+
+            return score;
+        }
+
+        function calculateScoreRate(score, maxScore) {
+            if (!maxScore || maxScore <= 0) return 0;
+            return score / maxScore * 100;
+        }
+
+        function calculateQuartile(sortedValues, q) {
+            if (!sortedValues || sortedValues.length === 0) return 0;
+
+            const pos = (sortedValues.length - 1) * q;
+            const base = Math.floor(pos);
+            const rest = pos - base;
+
+            if (sortedValues[base + 1] !== undefined) {
+                return sortedValues[base] + rest * (sortedValues[base + 1] - sortedValues[base]);
+            }
+
+            return sortedValues[base];
+        }
+
+        function createOverallQuartileInfo(scoreRates) {
+            const sortedRates = [...scoreRates].sort((a, b) => a - b);
+
+            const q1 = calculateQuartile(sortedRates, 0.25);
+            const q2 = calculateQuartile(sortedRates, 0.50);
+            const q3 = calculateQuartile(sortedRates, 0.75);
+
+            const labels = {
+                A: `A層（${q3.toFixed(1)}%超〜100.0%）`,
+                B: `B層（${q2.toFixed(1)}%超〜${q3.toFixed(1)}%）`,
+                C: `C層（${q1.toFixed(1)}%超〜${q2.toFixed(1)}%）`,
+                D: `D層（0.0%〜${q1.toFixed(1)}%）`
+            };
+
+            return {
+                q1,
+                q2,
+                q3,
+                labels
+            };
+        }
+
+        function classifyRateByOverallQuartile(rate, quartileInfo) {
+            if (!quartileInfo) return 'D';
+
+            if (rate > quartileInfo.q3) {
+                return 'A';
+            }
+
+            if (rate > quartileInfo.q2) {
+                return 'B';
+            }
+
+            if (rate > quartileInfo.q1) {
+                return 'C';
+            }
+
+            return 'D';
+        }
+
+        function createQuartileDistribution(scoreRates, quartileInfo) {
+            const distribution = {};
+
+            distribution[quartileInfo.labels.A] = 0;
+            distribution[quartileInfo.labels.B] = 0;
+            distribution[quartileInfo.labels.C] = 0;
+            distribution[quartileInfo.labels.D] = 0;
+
+            scoreRates.forEach(rate => {
+                const layer = classifyRateByOverallQuartile(rate, quartileInfo);
+                const label = quartileInfo.labels[layer];
+                distribution[label]++;
+            });
+
+            return distribution;
+        }
+
         const radarValueLabelPlugin = {
             id: 'radarValueLabel',
             afterDatasetsDraw(chart) {
                 const { ctx } = chart;
+
                 chart.data.datasets.forEach((dataset, datasetIndex) => {
                     const meta = chart.getDatasetMeta(datasetIndex);
                     if (meta.hidden) return;
+
                     meta.data.forEach((point, index) => {
                         const value = dataset.data[index];
                         if (value === undefined || value === null) return;
+
                         const text = value + '%';
+
                         ctx.fillStyle = '#2c3e50';
                         ctx.font = 'bold 10px sans-serif';
                         ctx.textAlign = 'center';
@@ -406,6 +825,7 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+
             document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
             document.getElementById(tabId).classList.add('active');
         }
@@ -413,11 +833,17 @@
         document.getElementById('csvFileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
+
             Papa.parse(file, {
-                header: true, skipEmptyLines: true,
+                header: true,
+                skipEmptyLines: true,
                 complete: function(results) {
-                    allData = results.data;
+                    allData = results.data || [];
                     updateAllDashboards();
+                },
+                error: function(err) {
+                    alert("CSVの読み込み中にエラーが発生しました。");
+                    console.error(err);
                 }
             });
         });
@@ -425,330 +851,660 @@
         document.getElementById('settingFileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
+
             const reader = new FileReader();
+
             reader.onload = function(evt) {
                 try {
                     const data = new Uint8Array(evt.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    
+                    const workbook = XLSX.read(data, { type: 'array' });
+
                     const memberSheet = workbook.Sheets["受験者名簿"];
+
                     if (memberSheet) {
-                        const memberJson = XLSX.utils.sheet_to_json(memberSheet);
+                        const memberJson = XLSX.utils.sheet_to_json(memberSheet, { defval: '' });
+
                         studentMap = {};
+                        studentGroupMap = {};
+
                         memberJson.forEach(row => {
                             if (!row) return;
-                            const rawId = row["答案番号"] !== undefined ? row["答案番号"] : (row["答案No"] || row["ID"]);
-                            const rawName = row["氏名"] !== undefined ? row["氏名"] : (row["名前"] || row["氏名"]);
-                            if (rawId !== undefined && rawName !== undefined) {
-                                studentMap[cleanId(String(rawId))] = String(rawName).trim();
+
+                            const rawId = getCellValue(row, ["答案番号", "答案No", "ID"]);
+                            const rawName = getCellValue(row, ["氏名", "名前"]);
+                            const rawGroup = getCellValue(row, ["所属グループ", "クラス", "組"]);
+
+                            if (String(rawId).trim() !== '') {
+                                const id = cleanId(String(rawId));
+
+                                if (String(rawName).trim() !== '') {
+                                    studentMap[id] = String(rawName).trim();
+                                }
+
+                                if (String(rawGroup).trim() !== '') {
+                                    studentGroupMap[id] = String(rawGroup).trim();
+                                }
                             }
                         });
                     }
 
-                    const categorySheet = workbook.Sheets["問題カテゴリ"];
-                    if (categorySheet) {
-                        const categoryJson = XLSX.utils.sheet_to_json(categorySheet);
-                        categoryMap = {};
-                        categoryJson.forEach(row => {
+                    const questionSheet = workbook.Sheets["問題カテゴリ"];
+
+                    if (questionSheet) {
+                        const questionJson = XLSX.utils.sheet_to_json(questionSheet, { defval: '' });
+
+                        questionList = [];
+                        areaMap = {};
+                        correctAnswersMaster = {};
+                        answerDisplayMap = {};
+
+                        questionJson.forEach(row => {
                             if (!row) return;
-                            const qNum = row["問題番号"] !== undefined ? String(row["問題番号"]).trim() : "";
-                            const catName = row["カテゴリ"] !== undefined ? String(row["カテゴリ"]).trim() : "";
-                            if (qNum && catName) categoryMap[qNum] = catName;
+
+                            const rawQuestionId = getCellValue(row, ["問題番号", "問番号", "設問番号"]);
+                            const qName = normalizeQuestionId(rawQuestionId);
+
+                            const areaName = getCellValue(row, ["領域", "カテゴリ", "分野"]);
+                            const correctAns = getCellValue(row, ["正答", "正解", "答え", "解答"]);
+                            const displayFlag = getCellValue(row, ["正答表示", "表示", "正答を表示"]);
+
+                            if (!qName) return;
+
+                            questionList.push(qName);
+
+                            if (String(areaName).trim() !== '') {
+                                areaMap[qName] = String(areaName).trim();
+                            }
+
+                            if (String(correctAns).trim() !== '') {
+                                correctAnswersMaster[qName] = String(correctAns).trim();
+                            }
+
+                            answerDisplayMap[qName] = isDisplayOn(displayFlag);
                         });
                     }
+
+                    console.log("読み込んだ問題一覧:", questionList);
+                    console.log("読み込んだ領域:", areaMap);
+                    console.log("読み込んだ正答:", correctAnswersMaster);
+                    console.log("正答表示設定:", answerDisplayMap);
+
                     updateAllDashboards();
+
                 } catch (err) {
                     alert("Excelの読み込み中にエラーが発生しました。");
                     console.error(err);
                 }
             };
+
             reader.readAsArrayBuffer(file);
         });
 
         function updateAllDashboards() {
-            if (allData.length > 0) {
-                processOverallData();
-                calculateCategoryStats();
-                drawCategoryDashboard();
-                setupGroupView();
-                setupPersonalView();
+            if (allData.length === 0) return;
+
+            if (questionList.length === 0) {
+                questionList = inferQuestionListFromCsv();
             }
+
+            processOverallData();
+            calculateAreaStats();
+            drawAreaDashboard();
+            setupGroupView();
+            setupPersonalView();
+        }
+
+        function getGroupFromRow(row) {
+            const rawId = row['答案番号'] ? String(row['答案番号']).trim() : '';
+            const id = cleanId(rawId);
+
+            if (
+                row['所属グループ'] !== undefined &&
+                row['所属グループ'] !== null &&
+                String(row['所属グループ']).trim() !== ''
+            ) {
+                return String(row['所属グループ']).trim();
+            }
+
+            if (studentGroupMap[id]) {
+                return studentGroupMap[id];
+            }
+
+            return '';
         }
 
         function processOverallData() {
+            const questions = getQuestionLabels();
+            const maxScore = questions.length;
+
             let totalScore = 0;
             let participantCount = allData.length;
-            let questionCorrectCounts = Array(10).fill(0);
+
+            if (participantCount === 0 || maxScore === 0) {
+                document.getElementById('participantCount').textContent = '- 人';
+                document.getElementById('averageScore').textContent = '- 点';
+                return;
+            }
+
+            let questionCorrectCounts = Array(maxScore).fill(0);
             let groupStats = {};
-            let scoreDistribution = { '0-2点':0, '3-4点':0, '5-6点':0, '7-8点':0, '9-10点':0 };
+            let allScoreRates = [];
 
             allData.forEach(row => {
-                let score = 0;
-                for (let i = 1; i <= 10; i++) {
-                    if (parseInt(row[`Q${i}_正誤`], 10) === 1) {
-                        score += 1;
-                        questionCorrectCounts[i-1] += 1;
-                    }
-                }
+                const score = calculateScore(row, questions);
+                const scoreRate = calculateScoreRate(score, maxScore);
+
+                allScoreRates.push(scoreRate);
                 totalScore += score;
-                let group = row['所属グループ'];
+
+                questions.forEach((qName, index) => {
+                    if (isCorrect(row, qName)) {
+                        questionCorrectCounts[index] += 1;
+                    }
+                });
+
+                const group = getGroupFromRow(row);
+
                 if (group) {
-                    group = String(group).trim();
-                    if (!groupStats[group]) groupStats[group] = { totalScore: 0, count: 0 };
+                    if (!groupStats[group]) {
+                        groupStats[group] = { totalScore: 0, count: 0 };
+                    }
+
                     groupStats[group].totalScore += score;
                     groupStats[group].count += 1;
                 }
-                if (score <= 2) scoreDistribution['0-2点']++;
-                else if (score <= 4) scoreDistribution['3-4点']++;
-                else if (score <= 6) scoreDistribution['5-6点']++;
-                else if (score <= 8) scoreDistribution['7-8点']++;
-                else scoreDistribution['9-10点']++;
             });
 
-            overallQuestionRates = questionCorrectCounts.map(count => (count / participantCount * 100).toFixed(1));
+            overallQuartileInfo = createOverallQuartileInfo(allScoreRates);
+            const scoreDistribution = createQuartileDistribution(allScoreRates, overallQuartileInfo);
+
+            overallQuestionRates = questionCorrectCounts.map(count =>
+                (count / participantCount * 100).toFixed(1)
+            );
+
             document.getElementById('participantCount').textContent = participantCount + ' 人';
             document.getElementById('averageScore').textContent = (totalScore / participantCount).toFixed(1) + ' 点';
 
-            let questionLabels = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10'];
-            
-            const overallRateDataset = [{ label: '全体平均正答率 (%)', data: overallQuestionRates, borderColor: '#3498db', backgroundColor: 'rgba(52, 152, 219, 0.2)', borderWidth: 2, pointBackgroundColor: '#3498db' }];
-            drawChart('questionRateChart', 'radar', questionLabels, overallRateDataset, '学年全体 問題別正答率', [radarValueLabelPlugin]);
-            drawChart('scoreDistChart', 'bar', Object.keys(scoreDistribution), [{ label: '人数 (人)', data: Object.values(scoreDistribution), backgroundColor: '#2ecc71' }], '得点分布');
-            let groupLabels = Object.keys(groupStats);
-            let groupAverages = groupLabels.map(g => (groupStats[g].totalScore / groupStats[g].count).toFixed(1));
-            drawChart('groupAvgChart', 'bar', groupLabels, [{ label: '平均点 (点)', data: groupAverages, backgroundColor: '#9b59b6' }], 'グループ別 平均点');
+            drawChart(
+                'questionRateChart',
+                'radar',
+                questions,
+                [
+                    {
+                        label: '全体平均正答率 (%)',
+                        data: overallQuestionRates,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#3498db'
+                    }
+                ],
+                '学年全体 問題別正答率',
+                [radarValueLabelPlugin]
+            );
+
+            drawChart(
+                'scoreDistChart',
+                'bar',
+                Object.keys(scoreDistribution),
+                [
+                    {
+                        label: '人数 (人)',
+                        data: Object.values(scoreDistribution),
+                        backgroundColor: ['#2ecc71', '#3498db', '#f1c40f', '#e67e22']
+                    }
+                ],
+                '得点率四分位分布（全体基準）'
+            );
+
+            const groupLabels = Object.keys(groupStats);
+            const groupAverages = groupLabels.map(g =>
+                (groupStats[g].totalScore / groupStats[g].count).toFixed(1)
+            );
+
+            drawChart(
+                'groupAvgChart',
+                'bar',
+                groupLabels,
+                [
+                    {
+                        label: '平均点 (点)',
+                        data: groupAverages,
+                        backgroundColor: '#9b59b6'
+                    }
+                ],
+                'グループ別 平均点'
+            );
         }
 
-        function calculateCategoryStats() {
-            if (Object.keys(categoryMap).length === 0) return;
+        function calculateAreaStats() {
+            const questions = getQuestionLabels();
 
-            categoriesList = [...new Set(Object.values(categoryMap))];
-            let catCorrectCounts = {};
-            let catQuestionCounts = {};
-            categoriesList.forEach(cat => { catCorrectCounts[cat] = 0; catQuestionCounts[cat] = 0; });
+            if (Object.keys(areaMap).length === 0 || questions.length === 0) {
+                areasList = [];
+                overallAreaRates = [];
+                return;
+            }
 
-            allData.forEach(row => {
-                for (let i = 1; i <= 10; i++) {
-                    const qName = `Q${i}`;
-                    const cat = categoryMap[qName];
-                    if (cat) {
-                        const isCorrect = parseInt(row[`Q${i}_正誤`], 10);
-                        catQuestionCounts[cat] += 1;
-                        if (isCorrect === 1) catCorrectCounts[cat] += 1;
-                    }
-                }
+            areasList = [...new Set(
+                questions
+                    .map(qName => areaMap[qName])
+                    .filter(Boolean)
+            )];
+
+            let areaCorrectCounts = {};
+            let areaTotalCounts = {};
+
+            areasList.forEach(area => {
+                areaCorrectCounts[area] = 0;
+                areaTotalCounts[area] = 0;
             });
 
-            overallCategoryRates = categoriesList.map(cat => {
-                const total = catQuestionCounts[cat];
-                const correct = catCorrectCounts[cat];
+            allData.forEach(row => {
+                questions.forEach(qName => {
+                    const area = areaMap[qName];
+
+                    if (area) {
+                        areaTotalCounts[area] += 1;
+
+                        if (isCorrect(row, qName)) {
+                            areaCorrectCounts[area] += 1;
+                        }
+                    }
+                });
+            });
+
+            overallAreaRates = areasList.map(area => {
+                const total = areaTotalCounts[area];
+                const correct = areaCorrectCounts[area];
+
                 return total > 0 ? ((correct / total) * 100).toFixed(1) : 0;
             });
         }
 
-        function drawCategoryDashboard() {
-            if (categoriesList.length === 0) {
-                if (charts['categoryRateChart']) charts['categoryRateChart'].destroy();
+        function drawAreaDashboard() {
+            if (areasList.length === 0) {
+                if (charts['areaRateChart']) charts['areaRateChart'].destroy();
                 return;
             }
-            const catDataset = [{
-                label: '分野別 平均正答率 (%)',
-                data: overallCategoryRates,
-                borderColor: '#e67e22',
-                backgroundColor: 'rgba(230, 126, 34, 0.2)',
-                borderWidth: 2,
-                pointBackgroundColor: '#e67e22'
-            }];
-            drawChart('categoryRateChart', 'radar', categoriesList, catDataset, '分野別 平均正答率 (カテゴリ比較)', [radarValueLabelPlugin]);
+
+            drawChart(
+                'areaRateChart',
+                'radar',
+                areasList,
+                [
+                    {
+                        label: '領域別 平均正答率 (%)',
+                        data: overallAreaRates,
+                        borderColor: '#e67e22',
+                        backgroundColor: 'rgba(230, 126, 34, 0.2)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#e67e22'
+                    }
+                ],
+                '領域別 平均正答率',
+                [radarValueLabelPlugin]
+            );
         }
 
         function setupGroupView() {
             const select = document.getElementById('groupSelect');
             select.innerHTML = '<option value="">-- 選択してください --</option>';
-            const groups = [...new Set(allData.map(row => row['所属グループ'] ? String(row['所属グループ']).trim() : '').filter(Boolean))];
+
+            const groups = [...new Set(
+                allData
+                    .map(row => getGroupFromRow(row))
+                    .filter(Boolean)
+            )];
+
             groups.forEach(group => {
-                let option = document.createElement('option');
-                option.value = group; option.textContent = group;
+                const option = document.createElement('option');
+                option.value = group;
+                option.textContent = group;
                 select.appendChild(option);
             });
+
             document.getElementById('groupParticipantCount').textContent = '- 人';
             document.getElementById('groupAverageScore').textContent = '- 点';
             document.getElementById('groupMaxScore').textContent = '- 点';
+
             if (charts['groupQuestionRateChart']) charts['groupQuestionRateChart'].destroy();
             if (charts['groupScoreDistChart']) charts['groupScoreDistChart'].destroy();
         }
 
         function drawGroupDashboard() {
             const selectedGroup = document.getElementById('groupSelect').value;
-            if (selectedGroup === "") { setupGroupView(); return; }
-            const groupMembers = allData.filter(row => row['所属グループ'] && String(row['所属グループ']).trim() === selectedGroup);
-            
-            let totalScore = 0; let maxScore = 0; let participantCount = groupMembers.length;
-            let questionCorrectCounts = Array(10).fill(0);
-            let scoreDistribution = { '0-2点':0, '3-4点':0, '5-6点':0, '7-8点':0, '9-10点':0 };
+
+            if (selectedGroup === "") {
+                setupGroupView();
+                return;
+            }
+
+            const questions = getQuestionLabels();
+            const maxScore = questions.length;
+
+            const groupMembers = allData.filter(row => getGroupFromRow(row) === selectedGroup);
+
+            let totalScore = 0;
+            let maxPersonalScore = 0;
+            let participantCount = groupMembers.length;
+
+            if (participantCount === 0 || maxScore === 0) return;
+
+            let questionCorrectCounts = Array(maxScore).fill(0);
+            let groupScoreRates = [];
 
             groupMembers.forEach(row => {
-                let score = 0;
-                for (let i = 1; i <= 10; i++) {
-                    if (parseInt(row[`Q${i}_正誤`], 10) === 1) { score += 1; questionCorrectCounts[i-1] += 1; }
-                }
+                const score = calculateScore(row, questions);
+                const scoreRate = calculateScoreRate(score, maxScore);
+
+                groupScoreRates.push(scoreRate);
                 totalScore += score;
-                if (score > maxScore) maxScore = score;
-                if (score <= 2) scoreDistribution['0-2点']++; else if (score <= 4) scoreDistribution['3-4点']++; else if (score <= 6) scoreDistribution['5-6点']++; else if (score <= 8) scoreDistribution['7-8点']++; else scoreDistribution['9-10点']++;
+
+                if (score > maxPersonalScore) {
+                    maxPersonalScore = score;
+                }
+
+                questions.forEach((qName, index) => {
+                    if (isCorrect(row, qName)) {
+                        questionCorrectCounts[index] += 1;
+                    }
+                });
             });
 
-            const groupQuestionRates = questionCorrectCounts.map(count => (count / participantCount * 100).toFixed(1));
+            const groupQuestionRates = questionCorrectCounts.map(count =>
+                (count / participantCount * 100).toFixed(1)
+            );
+
             const averageScore = (totalScore / participantCount).toFixed(1);
 
             document.getElementById('groupParticipantCount').textContent = participantCount + ' 人';
             document.getElementById('groupAverageScore').textContent = averageScore + ' 点';
-            document.getElementById('groupMaxScore').textContent = maxScore + ' 点';
+            document.getElementById('groupMaxScore').textContent = maxPersonalScore + ' 点';
 
-            let questionLabels = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10'];
-            const datasets = [
-                { label: '全体平均正答率 (%)', data: overallQuestionRates, borderColor: 'rgba(52, 152, 219, 0.8)', backgroundColor: 'rgba(52, 152, 219, 0.1)', borderWidth: 2, pointBackgroundColor: '#3498db' },
-                { label: `${selectedGroup} 正答率 (%)`, data: groupQuestionRates, borderColor: 'rgba(155, 89, 182, 0.8)', backgroundColor: 'rgba(155, 89, 182, 0.25)', borderWidth: 2, pointBackgroundColor: '#8e44ad' }
-            ];
-            drawChart('groupQuestionRateChart', 'radar', questionLabels, datasets, 'クラス別正答率（vs 全体平均）');
-            drawChart('groupScoreDistChart', 'bar', Object.keys(scoreDistribution), [{ label: '人数 (人)', data: Object.values(scoreDistribution), backgroundColor: 'rgba(46, 204, 113, 0.7)', borderColor: '#27ae60', borderWidth: 1 }], 'クラス内 得点分布');
-        }
-
-        function setupPersonalView() {
-            const select = document.getElementById('userSelect');
-            select.innerHTML = '<option value="">-- 選択してください --</option>';
-            allData.forEach((row, index) => {
-                if (!row) return;
-                let option = document.createElement('option');
-                option.value = index; 
-                const id = row['答案番号'] ? String(row['答案番号']).trim() : '';
-                const studentName = studentMap[cleanId(id)] ? studentMap[cleanId(id)] : `番号:${row['参加者固有番号'] || id}`;
-                option.textContent = `${row['所属グループ']} - ${studentName}`;
-                select.appendChild(option);
-            });
-            document.getElementById('personalTableBody').innerHTML = `<tr><td colspan="5" style="text-align: center; color: #999; padding: 40px 0;">参加者を選択するとデータが表示されます</td></tr>`;
-            document.getElementById('personalScore').textContent = '- 点';
-            document.getElementById('personalName').textContent = '氏名：-';
-            if (charts['personalCategoryChart']) charts['personalCategoryChart'].destroy();
-        }
-
-        function drawPersonalDashboard() {
-            const selectedIndex = document.getElementById('userSelect').value;
-            if (selectedIndex === "") { setupPersonalView(); return; }
-
-            const userData = allData[selectedIndex];
-            if (!userData) return;
-            
-            const tableBody = document.getElementById('personalTableBody');
-            tableBody.innerHTML = '';
-            
-            let personalScore = 0;
-            const id = userData['答案番号'] ? String(userData['答案番号']).trim() : '';
-            const studentName = studentMap[cleanId(id)] ? studentMap[cleanId(id)] : `（名簿未登録: 答案番号 ${id}）`;
-            document.getElementById('personalName').textContent = studentName + ' さん';
-
-            let hasCategory = categoriesList.length > 0;
-            let personalCatCorrect = {};
-            let personalCatTotal = {};
-            if (hasCategory) {
-                categoriesList.forEach(cat => { personalCatCorrect[cat] = 0; personalCatTotal[cat] = 0; });
-            }
-
-            for (let i = 1; i <= 10; i++) {
-                let answer = userData[`Q${i}_解答`] !== undefined ? userData[`Q${i}_解答`] : '';
-                
-                // ★構文エラーをクリーンに修正：タイポメモを完全に撤廃しました
-                let isCorrect = parseInt(userData[`Q${i}_正誤`], 10);
-                if (isNaN(isCorrect)) isCorrect = 0;
-                
-                if (hasCategory) {
-                    const cat = categoryMap[`Q${i}`];
-                    if (cat) {
-                        personalCatTotal[cat] += 1;
-                        if (isCorrect === 1) personalCatCorrect[cat] += 1;
-                    }
-                }
-
-                let resultMark = ''; let resultClass = ''; let displayCorrectAnswer = '';
-                if (isCorrect === 1) {
-                    personalScore += 1; resultMark = '〇'; resultClass = 'badge-correct'; displayCorrectAnswer = '-';
-                } else {
-                    resultMark = '×'; resultClass = 'badge-incorrect'; displayCorrectAnswer = correctAnswersMaster[i] || '不明';
-                }
-                let overallRate = overallQuestionRates[i-1];
-
-                let row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>Q${i}</td><td>${answer}</td><td class="text-center ${resultClass}">${resultMark}</td>
-                    <td class="${isCorrect !== 1 ? 'correct-ans-cell' : ''}">${displayCorrectAnswer}</td>
-                    <td>
-                        <div class="rate-container">
-                            <span class="rate-text">${overallRate}%</span>
-                            <div class="rate-bar-bg"><div class="rate-bar-fill" style="width: ${overallRate}%;"></div></div>
-                        </div>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            }
-            document.getElementById('personalScore').textContent = personalScore + ' 点';
-
-            if (hasCategory) {
-                let personalCategoryRates = categoriesList.map(cat => {
-                    const total = personalCatTotal[cat];
-                    const correct = personalCatCorrect[cat];
-                    return total > 0 ? ((correct / total) * 100).toFixed(1) : 0;
-                });
-
-                const datasets = [
+            drawChart(
+                'groupQuestionRateChart',
+                'radar',
+                questions,
+                [
                     {
-                        label: '全体平均 (%)',
-                        data: overallCategoryRates,
+                        label: '全体平均正答率 (%)',
+                        data: overallQuestionRates,
                         borderColor: 'rgba(52, 152, 219, 0.8)',
                         backgroundColor: 'rgba(52, 152, 219, 0.1)',
                         borderWidth: 2,
                         pointBackgroundColor: '#3498db'
                     },
                     {
-                        label: '本人の正答率 (%)',
-                        data: personalCategoryRates,
-                        borderColor: 'rgba(231, 76, 60, 0.8)',
-                        backgroundColor: 'rgba(231, 76, 60, 0.25)',
+                        label: `${selectedGroup} 正答率 (%)`,
+                        data: groupQuestionRates,
+                        borderColor: 'rgba(155, 89, 182, 0.8)',
+                        backgroundColor: 'rgba(155, 89, 182, 0.25)',
                         borderWidth: 2,
-                        pointBackgroundColor: '#e74c3c'
+                        pointBackgroundColor: '#8e44ad'
                     }
-                ];
-                drawChart('personalCategoryChart', 'radar', categoriesList, datasets, '分野別正答率（個人 vs 全体平均）', [radarValueLabelPlugin]);
+                ],
+                'クラス別正答率（vs 全体平均）'
+            );
+
+            if (!overallQuartileInfo) {
+                const allRates = allData.map(row => {
+                    const score = calculateScore(row, questions);
+                    return calculateScoreRate(score, maxScore);
+                });
+
+                overallQuartileInfo = createOverallQuartileInfo(allRates);
+            }
+
+            const groupQuartileDistribution = createQuartileDistribution(groupScoreRates, overallQuartileInfo);
+
+            drawChart(
+                'groupScoreDistChart',
+                'bar',
+                Object.keys(groupQuartileDistribution),
+                [
+                    {
+                        label: '人数 (人)',
+                        data: Object.values(groupQuartileDistribution),
+                        backgroundColor: ['#2ecc71', '#3498db', '#f1c40f', '#e67e22']
+                    }
+                ],
+                'クラス内 得点率四分位分布（全体基準）'
+            );
+        }
+
+        function setupPersonalView() {
+            const select = document.getElementById('userSelect');
+            select.innerHTML = '<option value="">-- 選択してください --</option>';
+
+            const questions = getQuestionLabels();
+            document.getElementById('personalMaxQuestionCount').textContent =
+                questions.length > 0 ? questions.length : '-';
+
+            allData.forEach((row, index) => {
+                if (!row) return;
+
+                const option = document.createElement('option');
+                option.value = index;
+
+                const id = row['答案番号'] ? String(row['答案番号']).trim() : '';
+                const cleanAnswerId = cleanId(id);
+
+                const studentName = studentMap[cleanAnswerId]
+                    ? studentMap[cleanAnswerId]
+                    : `番号:${row['参加者固有番号'] || id}`;
+
+                const group = getGroupFromRow(row) || '';
+
+                option.textContent = `${group} - ${studentName}`;
+                select.appendChild(option);
+            });
+
+            document.getElementById('personalTableBody').innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #999; padding: 40px 0;">
+                        参加者を選択するとデータが表示されます
+                    </td>
+                </tr>
+            `;
+
+            document.getElementById('personalScore').textContent = '- 点';
+            document.getElementById('personalName').textContent = '氏名：-';
+
+            if (charts['personalAreaChart']) charts['personalAreaChart'].destroy();
+        }
+
+        function drawPersonalDashboard() {
+            const selectedIndex = document.getElementById('userSelect').value;
+
+            if (selectedIndex === "") {
+                setupPersonalView();
+                return;
+            }
+
+            const questions = getQuestionLabels();
+            const userData = allData[selectedIndex];
+
+            if (!userData || questions.length === 0) return;
+
+            const tableBody = document.getElementById('personalTableBody');
+            tableBody.innerHTML = '';
+
+            let personalScore = 0;
+
+            const id = userData['答案番号'] ? String(userData['答案番号']).trim() : '';
+            const cleanAnswerId = cleanId(id);
+
+            const studentName = studentMap[cleanAnswerId]
+                ? studentMap[cleanAnswerId]
+                : `（名簿未登録: 答案番号 ${id}）`;
+
+            document.getElementById('personalName').textContent = studentName + ' さん';
+            document.getElementById('personalMaxQuestionCount').textContent = questions.length;
+
+            let hasArea = areasList.length > 0;
+            let personalAreaCorrect = {};
+            let personalAreaTotal = {};
+
+            if (hasArea) {
+                areasList.forEach(area => {
+                    personalAreaCorrect[area] = 0;
+                    personalAreaTotal[area] = 0;
+                });
+            }
+
+            questions.forEach((qName, index) => {
+                const answer = userData[`${qName}_解答`] !== undefined ? userData[`${qName}_解答`] : '';
+                const answerType = getAnswerType(userData, qName);
+
+                if (hasArea) {
+                    const area = areaMap[qName];
+
+                    if (area) {
+                        personalAreaTotal[area] += 1;
+
+                        if (answerType === 1) {
+                            personalAreaCorrect[area] += 1;
+                        }
+                    }
+                }
+
+                let resultMark = '';
+                let resultClass = '';
+                let displayCorrectAnswer = '';
+
+                if (answerType === 1) {
+                    personalScore += 1;
+                    resultMark = '〇';
+                    resultClass = 'badge-correct';
+                    displayCorrectAnswer = '-';
+                } else if (answerType === 0) {
+                    resultMark = '無解答';
+                    resultClass = 'badge-noanswer';
+                    displayCorrectAnswer = getCorrectAnswerText(qName);
+                } else if (answerType >= 2 && answerType <= 9) {
+                    resultMark = `× 類型${answerType}`;
+                    resultClass = 'badge-incorrect';
+                    displayCorrectAnswer = getCorrectAnswerText(qName);
+                } else {
+                    resultMark = '未判定';
+                    resultClass = 'badge-noanswer';
+                    displayCorrectAnswer = getCorrectAnswerText(qName);
+                }
+
+                const overallRate = overallQuestionRates[index] !== undefined ? overallQuestionRates[index] : 0;
+
+                const row = document.createElement('tr');
+
+                row.innerHTML = `
+                    <td>${escapeHtml(qName)}</td>
+                    <td>${escapeHtml(answer)}</td>
+                    <td class="text-center ${resultClass}">${escapeHtml(resultMark)}</td>
+                    <td class="${answerType !== 1 ? 'correct-ans-cell' : ''}">${escapeHtml(displayCorrectAnswer)}</td>
+                    <td>
+                        <div class="rate-container">
+                            <span class="rate-text">${overallRate}%</span>
+                            <div class="rate-bar-bg">
+                                <div class="rate-bar-fill" style="width: ${overallRate}%;"></div>
+                            </div>
+                        </div>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+
+            document.getElementById('personalScore').textContent = personalScore + ' 点';
+
+            if (hasArea) {
+                const personalAreaRates = areasList.map(area => {
+                    const total = personalAreaTotal[area];
+                    const correct = personalAreaCorrect[area];
+
+                    return total > 0 ? ((correct / total) * 100).toFixed(1) : 0;
+                });
+
+                drawChart(
+                    'personalAreaChart',
+                    'radar',
+                    areasList,
+                    [
+                        {
+                            label: '全体平均 (%)',
+                            data: overallAreaRates,
+                            borderColor: 'rgba(52, 152, 219, 0.8)',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#3498db'
+                        },
+                        {
+                            label: '本人の正答率 (%)',
+                            data: personalAreaRates,
+                            borderColor: 'rgba(231, 76, 60, 0.8)',
+                            backgroundColor: 'rgba(231, 76, 60, 0.25)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#e74c3c'
+                        }
+                    ],
+                    '領域別正答率（個人 vs 全体平均）',
+                    [radarValueLabelPlugin]
+                );
             } else {
-                if (charts['personalCategoryChart']) charts['personalCategoryChart'].destroy();
+                if (charts['personalAreaChart']) charts['personalAreaChart'].destroy();
             }
         }
 
         function drawChart(canvasId, type, labels, datasets, titleText, customPlugins = []) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            if (charts[canvasId]) charts[canvasId].destroy();
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+
+            if (charts[canvasId]) {
+                charts[canvasId].destroy();
+            }
 
             let scaleOptions = {};
+
             if (type === 'radar') {
-                scaleOptions = { r: { min: 0, max: 100, ticks: { stepSize: 20 } } };
+                scaleOptions = {
+                    r: {
+                        min: 0,
+                        max: 100,
+                        ticks: {
+                            stepSize: 20
+                        }
+                    }
+                };
             } else {
-                scaleOptions = { y: { beginAtZero: true } };
+                scaleOptions = {
+                    y: {
+                        beginAtZero: true
+                    }
+                };
             }
 
             charts[canvasId] = new Chart(ctx, {
                 type: type,
-                data: { labels: labels, datasets: datasets },
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { title: { display: true, text: titleText } },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: titleText
+                        }
+                    },
                     scales: scaleOptions
                 },
                 plugins: customPlugins
             });
         }
 
-        // =========================================================================
-        // ★印刷時にグラフを再計算させる処理
-        // =========================================================================
         window.addEventListener('beforeprint', () => {
             for (let id in charts) {
                 if (charts[id]) {
@@ -756,7 +1512,7 @@
                 }
             }
         });
-        
+
         window.addEventListener('afterprint', () => {
             for (let id in charts) {
                 if (charts[id]) {
