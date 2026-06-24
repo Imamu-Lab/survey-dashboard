@@ -344,7 +344,7 @@
 
         @media print {
             @page {
-                size: A4 portrait;
+                size: A4 landscape;
                 margin: 10mm;
             }
 
@@ -380,63 +380,11 @@
                 display: block !important;
             }
 
-            .overall-dashboard {
-                height: 480px !important;
-                margin-bottom: 20px !important;
-                display: grid !important;
-                grid-template-columns: 1fr 1fr !important;
-                gap: 15px !important;
-            }
-
-            .overall-left {
-                height: 100% !important;
-            }
-
-            .overall-right {
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 15px !important;
-                height: 100% !important;
-            }
-
-            .overall-bottom {
-                height: 380px !important;
-                margin-bottom: 0 !important;
-                display: block !important;
-            }
-
-            .dashboard {
-                height: 400px !important;
-                display: grid !important;
-                grid-template-columns: 1fr 1fr !important;
-                gap: 15px !important;
-            }
-
-            .dashboard-personal-top {
-                height: 350px !important;
-                margin-bottom: 20px !important;
-                display: grid !important;
-                grid-template-columns: 1fr 2fr !important;
-                gap: 15px !important;
-            }
-
-            #personal .chart-container:last-child {
-                height: auto !important;
-                overflow: visible !important;
-                display: block !important;
-            }
-
             .chart-container,
             .chart-container-large,
             .chart-container-small {
                 box-shadow: none !important;
                 border: 1px solid #ccc !important;
-            }
-
-            .personal-table th,
-            .personal-table td {
-                padding: 8px 10px !important;
-                font-size: 12px !important;
             }
 
             * {
@@ -451,7 +399,7 @@
     <div class="header">
         <h2>学力調査ダッシュボード</h2>
         <div class="header-actions">
-            <button class="print-button" onclick="window.print()">🖨️ この画面を印刷</button>
+            <button class="print-button" onclick="openPrintPreviewTab()">🖨️ 印刷用ページを開く</button>
             <div class="file-inputs-group">
                 <div class="file-upload">
                     <label for="csvFileInput">1. 回答CSV：</label>
@@ -863,28 +811,15 @@
                 D: `D層（0.0%〜${q1.toFixed(1)}%）`
             };
 
-            return {
-                q1,
-                q2,
-                q3,
-                labels
-            };
+            return { q1, q2, q3, labels };
         }
 
         function classifyRateByOverallQuartile(rate, quartileInfo) {
             if (!quartileInfo) return 'D';
 
-            if (rate > quartileInfo.q3) {
-                return 'A';
-            }
-
-            if (rate > quartileInfo.q2) {
-                return 'B';
-            }
-
-            if (rate > quartileInfo.q1) {
-                return 'C';
-            }
+            if (rate > quartileInfo.q3) return 'A';
+            if (rate > quartileInfo.q2) return 'B';
+            if (rate > quartileInfo.q1) return 'C';
 
             return 'D';
         }
@@ -963,6 +898,558 @@
 
             document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
             document.getElementById(tabId).classList.add('active');
+        }
+
+        function getCurrentReportTitle() {
+            const activeSection = document.querySelector('.view-section.active');
+
+            if (!activeSection) return '印刷用レポート';
+
+            if (activeSection.id === 'overall') return '全体レポート';
+            if (activeSection.id === 'group') return 'クラスレポート';
+            if (activeSection.id === 'personal') return '個人レポート';
+
+            return '印刷用レポート';
+        }
+
+        function getCurrentReportSubTitle() {
+            const activeSection = document.querySelector('.view-section.active');
+
+            if (!activeSection) return '';
+
+            if (activeSection.id === 'overall') {
+                return '学力調査 全体集計';
+            }
+
+            if (activeSection.id === 'group') {
+                const selectedGroup = document.getElementById('groupSelect')
+                    ? document.getElementById('groupSelect').value
+                    : '';
+
+                return selectedGroup ? `${selectedGroup} クラスレポート` : 'クラス未選択';
+            }
+
+            if (activeSection.id === 'personal') {
+                const selectedGroup = document.getElementById('personalGroupSelect')
+                    ? document.getElementById('personalGroupSelect').value
+                    : '';
+
+                const personalName = document.getElementById('personalName')
+                    ? document.getElementById('personalName').textContent
+                    : '';
+
+                if (selectedGroup && personalName && personalName !== '氏名：-') {
+                    return `${selectedGroup} / ${personalName}`;
+                }
+
+                if (selectedGroup) {
+                    return `${selectedGroup} / 参加者未選択`;
+                }
+
+                return 'クラス・参加者未選択';
+            }
+
+            return '';
+        }
+
+        function createPrintableContentFromActiveSection() {
+            const activeSection = document.querySelector('.view-section.active');
+
+            if (!activeSection) {
+                return '<p>印刷対象のレポートが見つかりません。</p>';
+            }
+
+            const activeId = activeSection.id;
+            const clonedSection = activeSection.cloneNode(true);
+
+            clonedSection.querySelectorAll('.control-panel').forEach(el => {
+                el.remove();
+            });
+
+            const summaryCards = clonedSection.querySelector('.summary-cards')
+                ? clonedSection.querySelector('.summary-cards').outerHTML
+                : '';
+
+            let tableContent = '';
+
+            if (activeId === 'personal') {
+                const personalTableContainer = clonedSection.querySelector('.personal-table')
+                    ? clonedSection.querySelector('.personal-table').closest('.chart-container')
+                    : null;
+
+                if (personalTableContainer) {
+                    tableContent = `
+                        <div class="print-table-section">
+                            ${personalTableContainer.innerHTML}
+                        </div>
+                    `;
+                }
+            }
+
+            const placeholderLabelsMap = {
+                overall: [
+                    '問題別正答率',
+                    '得点率四分位分布',
+                    'グループ別平均点',
+                    '領域別平均正答率',
+                    '追加チャート枠 1',
+                    '追加チャート枠 2',
+                    '追加チャート枠 3'
+                ],
+                group: [
+                    'クラス別正答率',
+                    'クラス内 得点率四分位分布',
+                    '追加チャート枠 1',
+                    '追加チャート枠 2',
+                    '追加チャート枠 3',
+                    '追加チャート枠 4',
+                    '追加チャート枠 5'
+                ],
+                personal: [
+                    '領域別正答率',
+                    '個人得点サマリー',
+                    '追加チャート枠 1',
+                    '追加チャート枠 2',
+                    '追加チャート枠 3',
+                    '追加チャート枠 4',
+                    '追加チャート枠 5'
+                ]
+            };
+
+            const placeholderLabels = placeholderLabelsMap[activeId] || [
+                'チャート枠 1',
+                'チャート枠 2',
+                'チャート枠 3',
+                'チャート枠 4',
+                'チャート枠 5',
+                'チャート枠 6',
+                'チャート枠 7'
+            ];
+
+            const firstRowLabels = placeholderLabels.slice(0, 4);
+            const secondRowLabels = placeholderLabels.slice(4, 7);
+
+            const chartLayoutHtml = `
+                <div class="print-chart-layout">
+                    <div class="print-chart-row print-chart-row-main">
+                        ${firstRowLabels.map((label, index) => `
+                            <div class="print-chart-placeholder">
+                                <div class="placeholder-title">${index + 1}. ${escapeHtml(label)}</div>
+                                <div class="placeholder-note">チャート画像化は次の段階で実装</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="print-chart-row print-chart-row-sub">
+                        ${secondRowLabels.map((label, index) => `
+                            <div class="print-chart-placeholder">
+                                <div class="placeholder-title">${index + 5}. ${escapeHtml(label)}</div>
+                                <div class="placeholder-note">チャート画像化は次の段階で実装</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            return `
+                ${summaryCards}
+                ${chartLayoutHtml}
+                ${tableContent}
+            `;
+        }
+
+        function openPrintPreviewTab() {
+            if (!isCsvLoaded || !isSettingLoaded) {
+                alert('回答CSVと設定Excelの両方を読み込んでから、印刷用ページを開いてください。');
+                return;
+            }
+
+            const printWindow = window.open('', '_blank');
+
+            if (!printWindow) {
+                alert('印刷用ページを開けませんでした。ブラウザのポップアップブロック設定を確認してください。');
+                return;
+            }
+
+            const reportTitle = getCurrentReportTitle();
+            const reportSubTitle = getCurrentReportSubTitle();
+            const printableContent = createPrintableContentFromActiveSection();
+            const createdAt = new Date().toLocaleString('ja-JP');
+
+            const printPageHtml = `
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${escapeHtml(reportTitle)} 印刷用</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            background: #f4f7f6;
+            color: #2c3e50;
+        }
+
+        body {
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .print-page {
+            max-width: 1180px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            box-sizing: border-box;
+        }
+
+        .print-header {
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+        }
+
+        .print-header h1 {
+            margin: 0 0 6px 0;
+            font-size: 24px;
+        }
+
+        .print-header .subtitle {
+            color: #555;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .print-header .created-at {
+            color: #777;
+            font-size: 12px;
+        }
+
+        .print-note {
+            background: #fffaf3;
+            border-left: 5px solid #e67e22;
+            padding: 8px 10px;
+            margin-bottom: 14px;
+            color: #555;
+            font-size: 13px;
+        }
+
+        .summary-cards {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            flex: 1;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .card h3 {
+            margin: 0 0 5px 0;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .card .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .print-chart-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .print-chart-row {
+            display: grid;
+            gap: 12px;
+        }
+
+        .print-chart-row-main {
+            grid-template-columns:
+                minmax(0, 2fr)
+                minmax(0, 2fr)
+                minmax(0, 3fr)
+                minmax(0, 3fr);
+        }
+
+        .print-chart-row-sub {
+            grid-template-columns:
+                minmax(0, 1fr)
+                minmax(0, 1fr)
+                minmax(0, 1fr);
+        }
+
+        .print-chart-placeholder {
+            height: 145px;
+            min-width: 0;
+            border: 2px dashed #bbb;
+            border-radius: 8px;
+            background: #fafafa;
+            color: #555;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .placeholder-title {
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .placeholder-note {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .print-table-section {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            box-sizing: border-box;
+        }
+
+        .print-table-section h3 {
+            margin-top: 0;
+            color: #555;
+            font-size: 15px;
+        }
+
+        .personal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        .personal-table th,
+        .personal-table td {
+            padding: 7px 8px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 12px;
+        }
+
+        .personal-table th {
+            background-color: #f8f9fa;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .badge-correct {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .badge-incorrect {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .badge-noanswer {
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+
+        .correct-ans-cell {
+            font-weight: bold;
+            color: #e67e22;
+        }
+
+        .text-center {
+            text-align: center !important;
+        }
+
+        .text-right {
+            text-align: right !important;
+        }
+
+        .rate-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .rate-text {
+            min-width: 42px;
+            text-align: right;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .rate-bar-bg {
+            width: 70px;
+            background-color: #e2e8f0;
+            height: 9px;
+            border-radius: 5px;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .rate-bar-fill {
+            background-color: #3498db;
+            height: 100%;
+            border-radius: 5px;
+        }
+
+        .print-actions {
+            margin-top: 18px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .print-actions button {
+            background-color: #2c3e50;
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .print-actions button:hover {
+            background-color: #1a252f;
+        }
+
+        @media print {
+            html, body {
+                background: #fff;
+                padding: 0;
+                margin: 0;
+            }
+
+            body {
+                padding: 0;
+            }
+
+            .print-page {
+                max-width: none;
+                width: 100%;
+                box-shadow: none;
+                border-radius: 0;
+                padding: 0;
+            }
+
+            .print-actions,
+            .print-note {
+                display: none !important;
+            }
+
+            .summary-cards {
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+
+            .card {
+                box-shadow: none;
+                padding: 9px;
+            }
+
+            .card .number {
+                font-size: 21px;
+            }
+
+            .print-chart-layout {
+                gap: 8px;
+                margin-bottom: 10px;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .print-chart-row {
+                gap: 8px;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .print-chart-row-main {
+                grid-template-columns:
+                    minmax(0, 2fr)
+                    minmax(0, 2fr)
+                    minmax(0, 3fr)
+                    minmax(0, 3fr);
+            }
+
+            .print-chart-row-sub {
+                grid-template-columns:
+                    minmax(0, 1fr)
+                    minmax(0, 1fr)
+                    minmax(0, 1fr);
+            }
+
+            .print-chart-placeholder {
+                height: 39mm;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .print-table-section {
+                page-break-inside: auto;
+                break-inside: auto;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-page">
+        <div class="print-header">
+            <h1>${escapeHtml(reportTitle)}</h1>
+            <div class="subtitle">${escapeHtml(reportSubTitle)}</div>
+            <div class="created-at">作成日時：${escapeHtml(createdAt)}</div>
+        </div>
+
+        <div class="print-note">
+            このページは印刷用ページ生成の初期実装です。1行目はfr指定による2:2:3:3、2行目は3列均等で配置しています。チャート画像化は次の段階で実装します。
+        </div>
+
+        <div class="print-content">
+            ${printableContent}
+        </div>
+
+        <div class="print-actions">
+            <button onclick="window.print()">この印刷用ページを印刷</button>
+            <button onclick="window.close()">閉じる</button>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+            printWindow.document.open();
+            printWindow.document.write(printPageHtml);
+            printWindow.document.close();
+            printWindow.focus();
         }
 
         document.getElementById('csvFileInput').addEventListener('change', function(e) {
