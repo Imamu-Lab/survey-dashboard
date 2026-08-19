@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="学力調査・質問調査ダッシュボードの開発・動作確認用ハブページです。">
+  <title>学力調査・質問調査ダッシュボード</title>
+  <style>
+    :root {
+      --navy: #20364a;
+      --blue: #2f80c3;
+      --blue-dark: #236496;
+      --orange: #d97706;
+      --orange-dark: #ad5f05;
+      --green: #27845d;
+      --green-dark: #1e6749;
+      --bg: #f3f6f8;
+      --panel: #ffffff;
+      --line: #d9e2e8;
+      --text: #263746;
+      --muted: #607080;
+      --warning-bg: #fff8e8;
+      --warning-line: #e6a23c;
+      --shadow: 0 5px 18px rgba(31, 54, 74, 0.09);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Yu Gothic UI", "Yu Gothic", Meiryo, sans-serif;
+      line-height: 1.7;
+    }
+
+    a { color: inherit; }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 30px 0 42px;
+    }
+
+    .hero {
+      padding: 30px;
+      color: #fff;
+      background: linear-gradient(135deg, #20364a 0%, #2f80c3 100%);
+      border-radius: 18px;
+      box-shadow: 0 12px 30px rgba(32, 54, 74, 0.20);
+    }
+
+    .hero-badge {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 4px 10px;
+      border: 1px solid rgba(255,255,255,.45);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(26px, 4vw, 38px);
+      line-height: 1.35;
+    }
+
+    .hero p {
+      max-width: 860px;
+      margin: 0;
+      color: rgba(255,255,255,.92);
+    }
+
+    .notice {
+      margin-top: 20px;
+      padding: 15px 18px;
+      background: var(--warning-bg);
+      border-left: 5px solid var(--warning-line);
+      border-radius: 9px;
+      color: #6b4b16;
+      box-shadow: var(--shadow);
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+      margin: 30px 0 14px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .section-heading span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .dashboard-card,
+    .download-panel,
+    .guide-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .dashboard-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 260px;
+      padding: 20px;
+    }
+
+    .dashboard-card .type {
+      align-self: flex-start;
+      margin-bottom: 11px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: #eaf3fa;
+      color: var(--blue-dark);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .dashboard-card.questionnaire .type {
+      background: #fff1df;
+      color: var(--orange-dark);
+    }
+
+    .dashboard-card h3 {
+      margin: 0 0 9px;
+      font-size: 19px;
+      line-height: 1.45;
+    }
+
+    .dashboard-card p {
+      flex: 1;
+      margin: 0 0 17px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .button {
+      display: block;
+      padding: 11px 14px;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--blue);
+      text-align: center;
+      text-decoration: none;
+      font-weight: 700;
+      transition: transform .15s ease, background .15s ease;
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      background: var(--blue-dark);
+      transform: translateY(-1px);
+    }
+
+    .questionnaire .button { background: var(--orange); }
+    .questionnaire .button:hover,
+    .questionnaire .button:focus-visible { background: var(--orange-dark); }
+
+    .download-panel { padding: 20px; }
+
+    .download-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .download-item {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fbfcfd;
+    }
+
+    .file-icon {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 9px;
+      background: #e9f4ef;
+      color: var(--green-dark);
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .file-icon.csv {
+      background: #eaf3fa;
+      color: var(--blue-dark);
+    }
+
+    .file-name {
+      overflow-wrap: anywhere;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .file-use {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .download-button {
+      padding: 8px 11px;
+      border-radius: 7px;
+      background: var(--green);
+      color: #fff;
+      text-decoration: none;
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .download-button:hover,
+    .download-button:focus-visible { background: var(--green-dark); }
+
+    .guide-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .guide-panel h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .guide-panel ol {
+      margin: 0;
+      padding-left: 22px;
+    }
+
+    .guide-panel li { margin: 4px 0; }
+
+    .privacy-note {
+      margin-top: 20px;
+      padding: 16px 18px;
+      background: #eef7f2;
+      border-left: 5px solid var(--green);
+      border-radius: 9px;
+      color: #285a45;
+    }
+
+    footer {
+      margin-top: 30px;
+      padding-top: 17px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .dashboard-card { min-height: auto; }
+      .download-list { grid-template-columns: 1fr; }
+      .guide-panel { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .page { width: min(100% - 20px, 1180px); padding-top: 12px; }
+      .hero { padding: 22px 18px; border-radius: 12px; }
+      .download-item { grid-template-columns: 38px minmax(0, 1fr); }
+      .download-button { grid-column: 1 / -1; text-align: center; }
+      .section-heading { display: block; }
+      .section-heading span { display: block; margin-top: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="hero-badge">開発・動作確認用</div>
+      <h1>学力調査・質問調査ダッシュボード</h1>
+      <p>
+        学校用および教育委員会用ダッシュボードへの入口です。
+        動作確認には、下部のダミーファイルをダウンロードして使用してください。
+      </p>
+    </header>
+
+    <section class="notice" aria-label="利用上の注意">
+      <strong>利用上の注意：</strong>
+      このページは開発・動作確認用です。GitHub上には、実際の児童生徒情報、学校別実データ、未公開の集計値を配置しないでください。
+      公開ページでの確認には、必ずダミーファイルを使用してください。
+    </section>
+
+    <div class="section-heading">
+      <h2>ダッシュボード</h2>
+      <span>目的に応じたダッシュボードを選択してください。</span>
+    </div>
+
+    <section class="dashboard-grid" aria-label="ダッシュボード一覧">
+      <article class="dashboard-card">
+        <div class="type">学校用</div>
+        <h3>教科調査ダッシュボード</h3>
+        <p>
+          学校全体、クラス、個人の教科調査結果を確認します。
+          個人帳票や学校・クラス用の印刷ページも生成できます。
+        </p>
+        <a class="button" href="./survey-dashboard-school.html">学校用ダッシュボードを開く</a>
+      </article>
+
+      <article class="dashboard-card">
+        <div class="type">教育委員会用</div>
+        <h3>教科調査ダッシュボード</h3>
+        <p>
+          教育事務所、市町村教育委員会、学校などの単位で、
+          教科調査結果の集計・比較を行います。
+        </p>
+        <a class="button" href="./survey-dashboard-admin.html">教育委員会用ダッシュボードを開く</a>
+      </article>
+
+      <article class="dashboard-card questionnaire">
+        <div class="type">教育委員会用</div>
+        <h3>質問調査ダッシュボード</h3>
+        <p>
+          質問項目別の回答分布を確認し、県全体、教育事務所、
+          市町村教育委員会、学校との比較や印刷を行います。
+        </p>
+        <a class="button" href="./survey-dashboard-admin-q.html">質問調査ダッシュボードを開く</a>
+      </article>
+    </section>
+
+    <div class="section-heading">
+      <h2>動作確認用ダミーファイル</h2>
+      <span>4つのファイルを個別にダウンロードできます。</span>
+    </div>
+
+    <section class="download-panel" aria-label="ダミーファイル一覧">
+      <div class="download-list">
+        <article class="download-item">
+          <div class="file-icon">XLSX</div>
+          <div>
+            <div class="file-name">R8_A_県学調_答案番号整理ファイル.xlsx</div>
+            <div class="file-use">名簿・答案番号Excelとして使用</div>
+          </div>
+          <a class="download-button" href="./samples/R8_A_県学調_答案番号整理ファイル.xlsx" download>ダウンロード</a>
+        </article>
+
+        <article class="download-item">
+          <div class="file-icon">XLSX</div>
+          <div>
+            <div class="file-name">R8_B小_県学調_共通マスタ.xlsx</div>
+            <div class="file-use">共通マスタExcelとして使用</div>
+          </div>
+          <a class="download-button" href="./samples/R8_B小_県学調_共通マスタ.xlsx" download>ダウンロード</a>
+        </article>
+
+        <article class="download-item">
+          <div class="file-icon csv">CSV</div>
+          <div>
+            <div class="file-name">R8_C小_CBTトライアル_小5国算（岩手県作成問題）_20260701.csv</div>
+            <div class="file-use">学校用・教育委員会用の教科調査ダッシュボードで使用</div>
+          </div>
+          <a class="download-button" href="./samples/R8_C小_CBTトライアル_小5国算（岩手県作成問題）_20260701.csv" download>ダウンロード</a>
+        </article>
+
+        <article class="download-item">
+          <div class="file-icon csv">CSV</div>
+          <div>
+            <div class="file-name">R8_D小_CBTトライアル_質問調査（岩手県作成問題）_20260701.csv</div>
+            <div class="file-use">教育委員会用の質問調査ダッシュボードで使用</div>
+          </div>
+          <a class="download-button" href="./samples/R8_D小_CBTトライアル_質問調査（岩手県作成問題）_20260701.csv" download>ダウンロード</a>
+        </article>
+      </div>
+    </section>
+
+    <div class="section-heading">
+      <h2>推奨する読み込み順</h2>
+      <span>共通マスタを最初に読み込んでください。</span>
+    </div>
+
+    <section class="guide-panel">
+      <div>
+        <h3>教科調査ダッシュボード</h3>
+        <ol>
+          <li>共通マスタExcel</li>
+          <li>対象教科を選択</li>
+          <li>教科調査CSV</li>
+          <li>名簿・答案番号Excel</li>
+        </ol>
+      </div>
+      <div>
+        <h3>質問調査ダッシュボード</h3>
+        <ol>
+          <li>共通マスタExcel</li>
+          <li>質問調査CSV</li>
+          <li>名簿・答案番号Excel</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="privacy-note">
+      <strong>ファイル処理について：</strong>
+      各ダッシュボードで選択したExcel・CSVは、現在の実装ではブラウザ内で読み取り・集計されます。
+      ダミーファイル以外を用いた検証を行う場合は、外部通信処理が含まれていないことを事前に確認してください。
+    </section>
+
+    <footer>
+      <p>Survey Dashboard Development Hub</p>
+    </footer>
+  </main>
+</body>
+</html>
