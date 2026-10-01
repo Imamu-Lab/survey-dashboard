@@ -61,6 +61,7 @@
     @media(max-width:900px){.audience-grid{grid-template-columns:1fr}.download-list{grid-template-columns:1fr}.sample-wide{grid-column:auto}.guide-panel{grid-template-columns:1fr}}
     @media(max-width:600px){.page{width:min(100% - 20px,1180px);padding-top:12px}.hero{padding:22px 18px;border-radius:12px}.download-item{grid-template-columns:48px minmax(0,1fr)}.file-letter{width:46px;height:46px;font-size:24px}.download-button,.unavailable-label{grid-column:1/-1;text-align:center}.section-heading{display:block}.section-heading span{display:block;margin-top:4px}}
 
+    .office-tool-stack{display:grid;gap:14px}
     .office-tool-panel{display:grid;grid-template-columns:72px minmax(0,1fr) auto;align-items:center;gap:18px;padding:22px;background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--green);border-radius:14px;box-shadow:var(--shadow)}
     .office-tool-icon{display:grid;place-items:center;width:68px;height:68px;border-radius:16px;background:#e9f4ef;color:var(--green-dark);font-size:30px;font-weight:900}
     .office-tool-label{display:inline-block;margin-bottom:6px;padding:3px 9px;border-radius:999px;background:#e9f4ef;color:var(--green-dark);font-size:12px;font-weight:700}
@@ -68,7 +69,12 @@
     .office-tool-panel p{margin:0;color:var(--muted);font-size:14px}
     .office-tool-button{display:inline-block;padding:11px 15px;border-radius:8px;background:var(--green);color:#fff;text-align:center;text-decoration:none;white-space:nowrap;font-weight:700;transition:transform .15s ease,background .15s ease}
     .office-tool-button:hover,.office-tool-button:focus-visible{background:var(--green-dark);transform:translateY(-1px)}
-    @media(max-width:700px){.office-tool-panel{grid-template-columns:56px minmax(0,1fr);gap:14px}.office-tool-icon{width:54px;height:54px;border-radius:12px;font-size:24px}.office-tool-button{grid-column:1/-1;width:100%}}
+    .office-tool-panel.analysis{border-left-color:var(--blue)}
+    .office-tool-panel.analysis .office-tool-icon{background:#eaf3fa;color:var(--blue-dark);font-size:24px}
+    .office-tool-panel.analysis .office-tool-label{background:#eaf3fa;color:var(--blue-dark)}
+    .office-tool-panel.analysis .office-tool-button{background:var(--blue)}
+    .office-tool-panel.analysis .office-tool-button:hover,.office-tool-panel.analysis .office-tool-button:focus-visible{background:var(--blue-dark)}
+    @media(max-width:700px){.office-tool-panel{grid-template-columns:56px minmax(0,1fr);gap:14px}.office-tool-icon{width:54px;height:54px;border-radius:12px;font-size:24px}.office-tool-panel.analysis .office-tool-icon{font-size:20px}.office-tool-button{grid-column:1/-1;width:100%}}
   </style>
 </head>
 <body>
@@ -118,15 +124,26 @@
     </section>
   </section>
 
-  <div class="section-heading"><h2>事務局作業用ツール</h2><span>上記4つのダッシュボードとは別に使用する、データ準備用のツールです。</span></div>
-  <section class="office-tool-panel" aria-label="事務局作業用ツール">
-    <div class="office-tool-icon" aria-hidden="true">CSV</div>
-    <div>
-      <div class="office-tool-label">事務局作業用</div>
-      <h3>学校・市町村別CSV分割ツール</h3>
-      <p>学力調査等のローデータを学校コードExcelと照合し、市町村単位・学校単位・1校指定で切り分けます。ダッシュボードへ読み込むファイルの準備に使用します。</p>
-    </div>
-    <a class="office-tool-button" href="https://imamu-lab.github.io/survey-csv-splitter/survey-csv-splitter.html" target="_blank" rel="noopener noreferrer">CSV分割ツールを開く</a>
+  <div class="section-heading"><h2>事務局作業用ツール</h2><span>上記4つのダッシュボードとは別に使用する、データ準備・分析用のツールです。</span></div>
+  <section class="office-tool-stack" aria-label="事務局作業用ツール一覧">
+    <article class="office-tool-panel">
+      <div class="office-tool-icon" aria-hidden="true">CSV</div>
+      <div>
+        <div class="office-tool-label">事務局作業用</div>
+        <h3>学校・市町村別CSV分割ツール</h3>
+        <p>学力調査等のローデータを学校コードExcelと照合し、市町村単位・学校単位・1校指定で切り分けます。ダッシュボードへ読み込むファイルの準備に使用します。</p>
+      </div>
+      <a class="office-tool-button" href="https://imamu-lab.github.io/survey-csv-splitter/survey-csv-splitter.html" target="_blank" rel="noopener noreferrer">CSV分割ツールを開く</a>
+    </article>
+    <article class="office-tool-panel analysis">
+      <div class="office-tool-icon" aria-hidden="true">3D</div>
+      <div>
+        <div class="office-tool-label">データ分析用</div>
+        <h3>3D散布図ビューアー</h3>
+        <p>Excel・CSVの数値データから3D散布図を作成し、3つの指標の分布や関係、相関を確認します。答案番号を使った2ファイルの照合や、条件による絞り込みにも対応しています。</p>
+      </div>
+      <a class="office-tool-button" href="https://imamu-lab.github.io/3d_scatter_viewer/3d_scatter_viewer.html" target="_blank" rel="noopener noreferrer">3D散布図ビューアーを開く</a>
+    </article>
   </section>
 
   <div class="section-heading"><h2>動作確認用ダミーファイル</h2><span>現在のサンプルCSVは、2教科と質問調査を1つにまとめたCのファイルです。</span></div>
